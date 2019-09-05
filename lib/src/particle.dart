@@ -161,11 +161,11 @@ class Particle {
         _aVelocityY = randomize(-0.1, 0.1),
         _aVelocityZ = randomize(-0.1, 0.1);
 
-  vmath.Vector2 _startUpForce;
+  final vmath.Vector2 _startUpForce;
 
-  vmath.Vector2 _location;
-  vmath.Vector2 _velocity;
-  vmath.Vector2 _acceleration;
+  final vmath.Vector2 _location;
+  final vmath.Vector2 _velocity;
+  final vmath.Vector2 _acceleration;
 
   double _aX = 0;
   double _aVelocityX;

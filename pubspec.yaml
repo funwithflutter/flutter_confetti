@@ -1,7 +1,7 @@
 name: confetti
 description: Blast colorful confetti all over the screen.
 version: 0.1.0
-author: funwithflutter@gmail.com
+author: Gordon <funwithflutter@gmail.com>
 homepage: https://github.com/funwithflutter/flutter_confetti
 
 environment:
@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   random_color: ^1.0.3
+  vector_math: ^2.0.8
 
 dev_dependencies:
   flutter_test:
