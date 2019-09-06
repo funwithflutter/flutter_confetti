@@ -1,3 +1,7 @@
+## [0.1.1]
+
+* Patch null pointer exception
+
 ## [0.1.0]
 
 * Initial release. You will probably experience some performance issues if you try and create too many particles at once
