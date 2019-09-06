@@ -38,7 +38,7 @@ class ParticleSystem extends ChangeNotifier {
 
   ParticleSystemStatus _particleSystemStatus;
 
-  List<Particle> _particles;
+  List<Particle> _particles = [];
 
   /// A frequency between 0 and 1 to determine how often the emitter
   /// should emit new particles.
