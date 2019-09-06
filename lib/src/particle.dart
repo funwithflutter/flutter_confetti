@@ -91,7 +91,7 @@ class ParticleSystem extends ChangeNotifier {
       // Determines whether to generate new particles based on the [frequency]
       final chanceToGenerate = _rand.nextDouble();
       if (chanceToGenerate < _frequency) {
-        _generateParticles(number: _numberOfParticles);
+        _particles.addAll(_generateParticles(number: _numberOfParticles));
       }
     }
 
@@ -118,8 +118,11 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   void _clean() {
-    if (_particleSystemPosition != null && _screenSize != null && particles != null) {
-      _particles.removeWhere((particle) => _isOutsideOfBorder(particle.location));
+    if (_particleSystemPosition != null &&
+        _screenSize != null &&
+        particles != null) {
+      _particles
+          .removeWhere((particle) => _isOutsideOfBorder(particle.location));
     }
   }
 
@@ -130,14 +133,9 @@ class ParticleSystem extends ChangeNotifier {
         (globalParticlePosition.dx <= _leftBorder);
   }
 
-  void _generateParticles({int number = 1}) {
-    final _newParticles =
-        List<Particle>.generate(number, (i) => Particle(_generateParticleForce()));
-    if (_particles != null) {
-      _particles.addAll(_newParticles);
-    } else {
-      _particles = _newParticles;
-    }
+  List<Particle> _generateParticles({int number = 1}) {
+    return List<Particle>.generate(
+        number, (i) => Particle(_generateParticleForce()));
   }
 
   vmath.Vector2 _generateParticleForce() {
