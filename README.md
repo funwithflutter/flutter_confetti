@@ -1,5 +1,8 @@
 Blast some confetti all over the screen and celebrate user achievements!  
-  
+
+## Demo
+<img height="480px" src="https://media.giphy.com/media/ZA4gWAVlhx18f3fhMY/giphy.gif">
+
 ## Getting Started  
   
 To use this plugin, add `confetti` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/). 
