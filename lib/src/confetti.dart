@@ -14,6 +14,7 @@ class ConfettiWidget extends StatefulWidget {
     this.blastDirection = pi,
     this.shouldLoop = false,
     this.displayTarget = false,
+    this.child,
   })  : assert(
             confettiController != null,
             emissionFrequency != null &&
@@ -58,6 +59,9 @@ class ConfettiWidget extends StatefulWidget {
   /// The [displayTarget] attribute determines if a crosshair will be displayed to show the location
   /// of the particle emitter
   final bool displayTarget;
+
+  /// Child widget to display
+  final Widget child;
 
   @override
   _ConfettiWidgetState createState() => _ConfettiWidgetState();
@@ -192,7 +196,11 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   Widget build(BuildContext context) {
     return CustomPaint(
       key: _particleSystemKey,
-      painter: ParticlePainter(particles: _particleSystem.particles, paintEmitterTarget: widget.displayTarget),
+      foregroundPainter: ParticlePainter(
+        particles: _particleSystem.particles,
+        paintEmitterTarget: widget.displayTarget,
+      ),
+      child: widget.child,
     );
   }
 

@@ -1,3 +1,8 @@
+## [0.1.2]
+
+* Provide optional child widget to render below the confetti
+* Changed the painter to use foregroundPainter to always paint the confetti above its child
+
 ## [0.1.1]
 
 * Patch null pointer exception
