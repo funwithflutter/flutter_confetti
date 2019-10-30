@@ -14,6 +14,7 @@ class ConfettiWidget extends StatefulWidget {
     this.blastDirection = pi,
     this.shouldLoop = false,
     this.displayTarget = false,
+    this.colors,
     this.child,
   })  : assert(
             confettiController != null,
@@ -60,6 +61,9 @@ class ConfettiWidget extends StatefulWidget {
   /// of the particle emitter
   final bool displayTarget;
 
+  /// List of Colors to iterate over - if null then random values will be chosen
+  final List<Color> colors;
+
   /// Child widget to display
   final Widget child;
 
@@ -80,11 +84,13 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     widget.confettiController.addListener(_handleChange);
 
     _particleSystem = ParticleSystem(
-        emissionFrequency: widget.emissionFrequency,
-        numberOfParticles: widget.numberOfParticles,
-        maxBlastForce: widget.maxBlastForce,
-        minBlastForce: widget.minBlastForce,
-        blastDirection: widget.blastDirection);
+      emissionFrequency: widget.emissionFrequency,
+      numberOfParticles: widget.numberOfParticles,
+      maxBlastForce: widget.maxBlastForce,
+      minBlastForce: widget.minBlastForce,
+      blastDirection: widget.blastDirection,
+      colors: widget.colors,
+    );
 
     _particleSystem.addListener(_particleSystemListener);
 

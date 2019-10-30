@@ -65,6 +65,7 @@ class _MyAppState extends State<MyApp> {
             emissionFrequency: 0.05,
             numberOfParticles: 10,
             shouldLoop: false,
+            colors: [Colors.green, Colors.blue, Colors.pink], // manually specify the colors to be used
           ),
         ),
         Align(

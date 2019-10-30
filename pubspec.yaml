@@ -1,6 +1,6 @@
 name: confetti
 description: Blast colorful confetti all over the screen. Celebrate in app achievements with style. Control the velocity, angle and amount of confetti.
-version: 0.1.2
+version: 0.2.0
 author: Gordon <funwithflutter@gmail.com>
 homepage: https://github.com/funwithflutter/flutter_confetti
 

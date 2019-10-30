@@ -19,6 +19,7 @@ class ParticleSystem extends ChangeNotifier {
     @required double maxBlastForce,
     @required double minBlastForce,
     @required double blastDirection,
+    List<Color> colors,
   })  : assert(emissionFrequency != null &&
             numberOfParticles != null &&
             maxBlastForce != null &&
@@ -34,11 +35,12 @@ class ParticleSystem extends ChangeNotifier {
         _minBlastForce = minBlastForce,
         _frequency = emissionFrequency,
         _numberOfParticles = numberOfParticles,
+        _colors = colors,
         _rand = Random();
 
   ParticleSystemStatus _particleSystemStatus;
 
-  List<Particle> _particles = [];
+  final List<Particle> _particles = [];
 
   /// A frequency between 0 and 1 to determine how often the emitter
   /// should emit new particles.
@@ -47,6 +49,7 @@ class ParticleSystem extends ChangeNotifier {
   final double _maxBlastForce;
   final double _minBlastForce;
   final double _blastDirection;
+  final List<Color> _colors;
 
   Offset _particleSystemPosition;
   Size _screenSize;
@@ -135,7 +138,7 @@ class ParticleSystem extends ChangeNotifier {
 
   List<Particle> _generateParticles({int number = 1}) {
     return List<Particle>.generate(
-        number, (i) => Particle(_generateParticleForce()));
+        number, (i) => Particle(_generateParticleForce(), _randomColor()));
   }
 
   vmath.Vector2 _generateParticleForce() {
@@ -144,12 +147,23 @@ class ParticleSystem extends ChangeNotifier {
     final x = blastRadius * cos(_blastDirection);
     return vmath.Vector2(x, y);
   }
+
+  Color _randomColor() {
+    if (_colors != null) {
+      if (_colors.length == 1) {
+        return _colors[0];
+      }
+      final index = _rand.nextInt(_colors.length);
+      return _colors[index];
+    }
+    return RandomColor().randomColor();
+  }
 }
 
 class Particle {
-  Particle(vmath.Vector2 startUpForce)
+  Particle(vmath.Vector2 startUpForce, Color color)
       : _startUpForce = startUpForce,
-        _color = RandomColor().randomColor(),
+        _color = color,
         _mass = randomize(1, 11),
         _location = vmath.Vector2.zero(),
         _acceleration = vmath.Vector2.zero(),

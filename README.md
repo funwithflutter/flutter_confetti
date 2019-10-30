@@ -24,6 +24,7 @@ Other attributes that can be set are:
 * `maxBlastForce` -> will determine the maximum blast force applied to a particle within it's first 5 frames of life. The default `maxBlastForce` is set to `20`
 * `minBlastForce` -> will determine the minimum blast force applied to a particle within it's first 5 frames of life. The default `minBlastForce` is set to `5`
 * `displayTarget` -> if `true` a crosshair will be displayed to show the location of the particle emitter
+* `colors` -> a list of colors can be provided to manually set the confetti colors. If omitted then random colors will be used. A single color, for example `[Colors.blue]`, or multiple colors `[Colors.blue, Colors.red, Colors.green]` can be provided as an argument in the `ConfettiWidget
 
 Enjoy the confetti.
 
