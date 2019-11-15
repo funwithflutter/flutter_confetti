@@ -210,7 +210,7 @@ class Particle {
     applyForce(drag);
   }
 
-  void _applyStartUpFoce() {
+  void _applyStartUpForce() {
     applyForce(_startUpForce);
   }
 
@@ -222,7 +222,7 @@ class Particle {
     drag();
 
     if (_timeAlive < 5) {
-      _applyStartUpFoce();
+      _applyStartUpForce();
     }
     if (_timeAlive < 25) {
       _applyWindForceUp();
