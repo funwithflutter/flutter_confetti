@@ -83,6 +83,8 @@ class _MyAppState extends State<MyApp> {
             confettiController: _controllerCenterLeft,
             blastDirection: 0, // radial value - RIGHT
             emissionFrequency: 0.6,
+            minimumSize: const Size(10,10), // set the minimum potential size for the confetti (width, height)
+            maximumSize: const Size(50,50), // set the maximum potential size for the confetti (width, height)
             numberOfParticles: 1,
           ),
         ),

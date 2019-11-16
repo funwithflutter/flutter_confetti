@@ -13,29 +13,41 @@ enum ParticleSystemStatus {
 }
 
 class ParticleSystem extends ChangeNotifier {
-  ParticleSystem({
-    @required double emissionFrequency,
-    @required int numberOfParticles,
-    @required double maxBlastForce,
-    @required double minBlastForce,
-    @required double blastDirection,
-    List<Color> colors,
-  })  : assert(emissionFrequency != null &&
+  ParticleSystem(
+      {@required double emissionFrequency,
+      @required int numberOfParticles,
+      @required double maxBlastForce,
+      @required double minBlastForce,
+      @required double blastDirection,
+      @required List<Color> colors,
+      @required Size minimumSize,
+      @required Size maximumsize})
+      : assert(emissionFrequency != null &&
             numberOfParticles != null &&
             maxBlastForce != null &&
             minBlastForce != null &&
-            blastDirection != null),
+            blastDirection != null &&
+            minimumSize != null &&
+            maximumsize != null),
         assert(maxBlastForce > 0 &&
             minBlastForce > 0 &&
             emissionFrequency >= 0 &&
             emissionFrequency <= 1 &&
-            numberOfParticles > 0),
+            numberOfParticles > 0 &&
+            minimumSize.width > 0 &&
+            minimumSize.height > 0 &&
+            maximumsize.width > 0 &&
+            maximumsize.height > 0 &&
+            minimumSize.width <= maximumsize.width &&
+            minimumSize.height <= maximumsize.height),
         _blastDirection = blastDirection,
         _maxBlastForce = maxBlastForce,
         _minBlastForce = minBlastForce,
         _frequency = emissionFrequency,
         _numberOfParticles = numberOfParticles,
         _colors = colors,
+        _minimumSize = minimumSize,
+        _maximumSize = maximumsize,
         _rand = Random();
 
   ParticleSystemStatus _particleSystemStatus;
@@ -50,6 +62,8 @@ class ParticleSystem extends ChangeNotifier {
   final double _minBlastForce;
   final double _blastDirection;
   final List<Color> _colors;
+  final Size _minimumSize;
+  final Size _maximumSize;
 
   Offset _particleSystemPosition;
   Size _screenSize;
@@ -138,7 +152,9 @@ class ParticleSystem extends ChangeNotifier {
 
   List<Particle> _generateParticles({int number = 1}) {
     return List<Particle>.generate(
-        number, (i) => Particle(_generateParticleForce(), _randomColor()));
+        number,
+        (i) =>
+            Particle(_generateParticleForce(), _randomColor(), _randomSize()));
   }
 
   vmath.Vector2 _generateParticleForce() {
@@ -158,17 +174,25 @@ class ParticleSystem extends ChangeNotifier {
     }
     return RandomColor().randomColor();
   }
+
+  Size _randomSize() {
+    return Size(
+      randomize(_minimumSize.width, _maximumSize.width),
+      randomize(_minimumSize.height, _maximumSize.height),
+    );
+  }
 }
 
 class Particle {
-  Particle(vmath.Vector2 startUpForce, Color color)
+  Particle(vmath.Vector2 startUpForce, Color color, Size size)
       : _startUpForce = startUpForce,
         _color = color,
         _mass = randomize(1, 11),
         _location = vmath.Vector2.zero(),
         _acceleration = vmath.Vector2.zero(),
         _velocity = vmath.Vector2(randomize(-3, 3), randomize(-3, 3)),
-        _size = Size(randomize(20, 30), randomize(10, 15)),
+        _size = size,
+        // _size = Size(randomize(20, 30), randomize(10, 15)),
         _aVelocityX = randomize(-0.1, 0.1),
         _aVelocityY = randomize(-0.1, 0.1),
         _aVelocityZ = randomize(-0.1, 0.1);

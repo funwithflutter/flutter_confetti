@@ -15,6 +15,8 @@ class ConfettiWidget extends StatefulWidget {
     this.shouldLoop = false,
     this.displayTarget = false,
     this.colors,
+    this.minimumSize = const Size(20, 10),
+    this.maximumSize = const Size(30, 15),
     this.child,
   })  : assert(
             confettiController != null,
@@ -64,6 +66,14 @@ class ConfettiWidget extends StatefulWidget {
   /// List of Colors to iterate over - if null then random values will be chosen
   final List<Color> colors;
 
+  /// An optional parameter to set the minimum size potential size for the confetti.
+  /// Must be smaller than the [maximumSize] attribute. Cannot be null
+  final Size minimumSize;
+
+  /// An optional parameter to set the maximum potential size for the confetti.
+  /// Must be bigger than the [minimumSize] attribute. Cannot be null
+  final Size maximumSize;
+
   /// Child widget to display
   final Widget child;
 
@@ -90,6 +100,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
       minBlastForce: widget.minBlastForce,
       blastDirection: widget.blastDirection,
       colors: widget.colors,
+      minimumSize: widget.minimumSize,
+      maximumsize: widget.maximumSize,
     );
 
     _particleSystem.addListener(_particleSystemListener);
