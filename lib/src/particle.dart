@@ -21,7 +21,8 @@ class ParticleSystem extends ChangeNotifier {
       @required double blastDirection,
       @required List<Color> colors,
       @required Size minimumSize,
-      @required Size maximumsize})
+      @required Size maximumsize,
+      double fallingSpeed = 0.3})
       : assert(emissionFrequency != null &&
             numberOfParticles != null &&
             maxBlastForce != null &&
@@ -41,6 +42,7 @@ class ParticleSystem extends ChangeNotifier {
             minimumSize.width <= maximumsize.width &&
             minimumSize.height <= maximumsize.height),
         _blastDirection = blastDirection,
+        _fallingSpeed = fallingSpeed,
         _maxBlastForce = maxBlastForce,
         _minBlastForce = minBlastForce,
         _frequency = emissionFrequency,
@@ -61,6 +63,7 @@ class ParticleSystem extends ChangeNotifier {
   final double _maxBlastForce;
   final double _minBlastForce;
   final double _blastDirection;
+  final double _fallingSpeed;
   final List<Color> _colors;
   final Size _minimumSize;
   final Size _maximumSize;
@@ -154,7 +157,7 @@ class ParticleSystem extends ChangeNotifier {
     return List<Particle>.generate(
         number,
         (i) =>
-            Particle(_generateParticleForce(), _randomColor(), _randomSize()));
+            Particle(_generateParticleForce(), _randomColor(), _randomSize(), _fallingSpeed));
   }
 
   vmath.Vector2 _generateParticleForce() {
@@ -184,7 +187,7 @@ class ParticleSystem extends ChangeNotifier {
 }
 
 class Particle {
-  Particle(vmath.Vector2 startUpForce, Color color, Size size)
+  Particle(vmath.Vector2 startUpForce, Color color, Size size, double fallingSpeed)
       : _startUpForce = startUpForce,
         _color = color,
         _mass = randomize(1, 11),
@@ -195,7 +198,8 @@ class Particle {
         // _size = Size(randomize(20, 30), randomize(10, 15)),
         _aVelocityX = randomize(-0.1, 0.1),
         _aVelocityY = randomize(-0.1, 0.1),
-        _aVelocityZ = randomize(-0.1, 0.1);
+        _aVelocityZ = randomize(-0.1, 0.1),
+        _fallingSpeed = fallingSpeed;
 
   final vmath.Vector2 _startUpForce;
 
@@ -209,6 +213,7 @@ class Particle {
   double _aVelocityY;
   double _aZ = 0;
   double _aVelocityZ;
+  double _fallingSpeed;
   final _aAcceleration = 0.0001;
 
   final Color _color;
@@ -254,7 +259,7 @@ class Particle {
 
     _timeAlive += 1;
 
-    applyForce(vmath.Vector2(0, 0.3));
+    applyForce(vmath.Vector2(0, _fallingSpeed));
 
     _velocity.add(_acceleration);
     _location.add(_velocity);

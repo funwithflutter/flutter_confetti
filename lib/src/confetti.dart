@@ -12,6 +12,7 @@ class ConfettiWidget extends StatefulWidget {
     this.maxBlastForce = 20,
     this.minBlastForce = 5,
     this.blastDirection = pi,
+    this.fallingSpeed = 0.3,
     this.shouldLoop = false,
     this.displayTarget = false,
     this.colors,
@@ -47,6 +48,9 @@ class ConfettiWidget extends StatefulWidget {
   /// The [blastDirection] is a radial value to determine the direction of the particle emission.
   /// The default is set to `PI` (180 degrees). A value of `PI` will emit to the left of the canvas/screen.
   final double blastDirection;
+
+  /// The [fallingSpeed] is speed of confetti's falling.
+  final double fallingSpeed;
 
   /// The [emissionFrequency] should be a value between 0 and 1. The higher the value the higher the
   /// likelihood that particles will be emitted on a single frame. Default is set to `0.02` (2% chance)
@@ -99,6 +103,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
       maxBlastForce: widget.maxBlastForce,
       minBlastForce: widget.minBlastForce,
       blastDirection: widget.blastDirection,
+      fallingSpeed: widget.fallingSpeed,
       colors: widget.colors,
       minimumSize: widget.minimumSize,
       maximumsize: widget.maximumSize,
