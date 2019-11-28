@@ -19,6 +19,7 @@ class ConfettiWidget extends StatefulWidget {
     this.colors,
     this.minimumSize = const Size(20, 10),
     this.maximumSize = const Size(30, 15),
+    this.particleDrag = 0.05,
     this.child,
   })  : assert(
             confettiController != null,
@@ -81,6 +82,10 @@ class ConfettiWidget extends StatefulWidget {
   /// Must be bigger than the [minimumSize] attribute. Cannot be null
   final Size maximumSize;
 
+  /// Set your own custom particle drag, affective the movement of the confetti.
+  /// Using 1.0 will give no drag at all, while using 0.1 will give a lot of drag. Default is set to `0.05`.
+  final double particleDrag;
+  
   /// Child widget to display
   final Widget child;
 
@@ -96,7 +101,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   Animation<double> _animation;
   ParticleSystem _particleSystem;
 
-  get _randomBlastDirection => vmath.radians(Random().nextInt(359).toDouble());
+  double get _randomBlastDirection => vmath.radians(Random().nextInt(359).toDouble());
 
   @override
   void initState() {
@@ -111,6 +116,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
       colors: widget.colors,
       minimumSize: widget.minimumSize,
       maximumsize: widget.maximumSize,
+      particleDrag: widget.particleDrag
     );
 
     _particleSystem.addListener(_particleSystemListener);
