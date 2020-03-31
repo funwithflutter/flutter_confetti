@@ -317,7 +317,9 @@ enum ConfettiControllerState {
 
 class ConfettiController extends ChangeNotifier {
   ConfettiController({this.duration = const Duration(seconds: 30)})
-      : assert(duration != null);
+      : assert(duration != null &&
+            !duration.isNegative &&
+            duration.inMicroseconds > 0);
 
   Duration duration;
 
