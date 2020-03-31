@@ -224,7 +224,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   @override
   void dispose() {
-    print('dispose called');
     _animController.dispose();
     widget.confettiController.removeListener(_handleChange);
     _particleSystem.removeListener(_particleSystemListener);
