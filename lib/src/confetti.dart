@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:confetti/src/particle.dart';
-import 'package:vector_math/vector_math.dart' as vmath;
+
+import 'enums/blast_directionality.dart';
+import 'enums/confetti_controller_state.dart';
 
 class ConfettiWidget extends StatefulWidget {
   const ConfettiWidget({
@@ -14,7 +16,7 @@ class ConfettiWidget extends StatefulWidget {
     this.minBlastForce = 5,
     this.blastDirectionality = BlastDirectionality.directional,
     this.blastDirection = pi,
-    this.gravity = 0.3,
+    this.gravity = 0.2,
     this.shouldLoop = false,
     this.displayTarget = false,
     this.colors,
@@ -62,6 +64,7 @@ class ConfettiWidget extends StatefulWidget {
   /// The higher the [gravity] the faster it will fall.
   ///
   /// It can be set to a value between `0` and `1`
+  /// Default value is `0.1`
   final double gravity;
 
   /// The [emissionFrequency] should be a value between 0 and 1. The higher the value the higher the
@@ -90,8 +93,8 @@ class ConfettiWidget extends StatefulWidget {
   /// Must be bigger than the [minimumSize] attribute. Cannot be null
   final Size maximumSize;
 
-  /// Set your own custom particle drag, affective the movement of the confetti.
-  /// Using 1.0 will give no drag at all, while using 0.1 will give a lot of drag. Default is set to `0.05`.
+  /// An optional parameter to specify drag force, effecting the movement of the confetti.
+  /// Using `1.0` will give no drag at all, while, for example, using `0.1` will give a lot of drag. Default is set to `0.05`.
   final double particleDrag;
 
   /// Child widget to display
@@ -109,9 +112,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   Animation<double> _animation;
   ParticleSystem _particleSystem;
 
-  double get _randomBlastDirection =>
-      vmath.radians(Random().nextInt(359).toDouble());
-
   @override
   void initState() {
     widget.confettiController.addListener(_handleChange);
@@ -122,10 +122,11 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
         maxBlastForce: widget.maxBlastForce,
         minBlastForce: widget.minBlastForce,
         gravity: widget.gravity,
-        blastDirection:
-            widget.blastDirectionality == BlastDirectionality.directional
-                ? widget.blastDirection
-                : _randomBlastDirection,
+        blastDirection: widget.blastDirection,
+        // widget.blastDirectionality == BlastDirectionality.directional
+        //     ? widget.blastDirection
+        //     : _randomBlastDirection,
+        blastDirectionality: widget.blastDirectionality,
         colors: widget.colors,
         minimumSize: widget.minimumSize,
         maximumsize: widget.maximumSize,
@@ -336,13 +337,6 @@ class ParticlePainter extends CustomPainter {
     return true;
   }
 }
-
-enum ConfettiControllerState {
-  playing,
-  stopped,
-}
-
-enum BlastDirectionality { directional, explosive }
 
 class ConfettiController extends ChangeNotifier {
   ConfettiController({this.duration = const Duration(seconds: 30)})

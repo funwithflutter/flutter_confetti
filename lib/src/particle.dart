@@ -7,6 +7,8 @@ import 'package:vector_math/vector_math.dart' as vmath;
 
 import 'package:confetti/src/helper.dart';
 
+import 'enums/blast_directionality.dart';
+
 enum ParticleSystemStatus {
   started,
   finished,
@@ -20,19 +22,23 @@ class ParticleSystem extends ChangeNotifier {
       @required double maxBlastForce,
       @required double minBlastForce,
       @required double blastDirection,
+      @required BlastDirectionality blastDirectionality,
       @required List<Color> colors,
       @required Size minimumSize,
       @required Size maximumsize,
       @required double particleDrag,
-      double gravity = 0.3})
-      : assert(emissionFrequency != null &&
-            numberOfParticles != null &&
-            maxBlastForce != null &&
-            minBlastForce != null &&
-            blastDirection != null &&
-            minimumSize != null &&
-            maximumsize != null &&
-            particleDrag != null),
+      @required double gravity})
+      : assert(
+          emissionFrequency != null &&
+              numberOfParticles != null &&
+              maxBlastForce != null &&
+              minBlastForce != null &&
+              blastDirection != null &&
+              minimumSize != null &&
+              maximumsize != null &&
+              particleDrag != null &&
+              blastDirectionality != null,
+        ),
         assert(maxBlastForce > 0 &&
             minBlastForce > 0 &&
             emissionFrequency >= 0 &&
@@ -44,10 +50,12 @@ class ParticleSystem extends ChangeNotifier {
             maximumsize.height > 0 &&
             minimumSize.width <= maximumsize.width &&
             minimumSize.height <= maximumsize.height &&
-            particleDrag > 0.0 &&
+            particleDrag >= 0.0 &&
+            particleDrag <= 1 &&
             minimumSize.height <= maximumsize.height),
         assert(gravity >= 0 && gravity <= 1),
         _blastDirection = blastDirection,
+        _blastDirectionality = blastDirectionality,
         _gravity = gravity,
         _maxBlastForce = maxBlastForce,
         _minBlastForce = minBlastForce,
@@ -70,6 +78,7 @@ class ParticleSystem extends ChangeNotifier {
   final double _maxBlastForce;
   final double _minBlastForce;
   final double _blastDirection;
+  final BlastDirectionality _blastDirectionality;
   final double _gravity;
   final List<Color> _colors;
   final Size _minimumSize;
@@ -168,10 +177,17 @@ class ParticleSystem extends ChangeNotifier {
             _gravity, _particleDrag));
   }
 
+  double get _randomBlastDirection =>
+      vmath.radians(Random().nextInt(359).toDouble());
+
   vmath.Vector2 _generateParticleForce() {
+    var blastDirection = _blastDirection;
+    if (_blastDirectionality == BlastDirectionality.explosive) {
+      blastDirection = _randomBlastDirection;
+    }
     final blastRadius = randomize(_minBlastForce, _maxBlastForce);
-    final y = blastRadius * sin(_blastDirection);
-    final x = blastRadius * cos(_blastDirection);
+    final y = blastRadius * sin(blastDirection);
+    final x = blastRadius * cos(blastDirection);
     return vmath.Vector2(x, y);
   }
 
@@ -217,7 +233,7 @@ class Particle {
   final vmath.Vector2 _velocity;
   final vmath.Vector2 _acceleration;
 
-  double _particleDrag;
+  final double _particleDrag;
   double _aX = 0;
   double _aVelocityX;
   double _aY = 0;

@@ -1,0 +1,4 @@
+enum ConfettiControllerState {
+  playing,
+  stopped,
+}

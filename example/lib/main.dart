@@ -27,6 +27,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  ConfettiController _controllerCenter;
   ConfettiController _controllerCenterRight;
   ConfettiController _controllerCenterLeft;
   ConfettiController _controllerTopCenter;
@@ -34,6 +35,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    _controllerCenter =
+        ConfettiController(duration: const Duration(seconds: 10));
     _controllerCenterRight =
         ConfettiController(duration: const Duration(seconds: 10));
     _controllerCenterLeft =
@@ -47,6 +50,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
+    _controllerCenter.dispose();
     _controllerCenterRight.dispose();
     _controllerCenterLeft.dispose();
     _controllerTopCenter.dispose();
@@ -58,15 +62,43 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
+        //CENTER -- Blast
+        Align(
+          alignment: Alignment.center,
+          child: ConfettiWidget(
+            confettiController: _controllerCenter,
+            blastDirectionality: BlastDirectionality
+                .explosive, // don't specify a direction, blast randomly
+            shouldLoop:
+                true, // start again as soon as the animation is finished
+            colors: [
+              Colors.green,
+              Colors.blue,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple
+            ], // manually specify the colors to be used
+          ),
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: FlatButton(
+              onPressed: () {
+                _controllerCenter.play();
+              },
+              child: _display('blast')),
+        ),
+
         //CENTER RIGHT -- Emit left
         Align(
           alignment: Alignment.centerRight,
           child: ConfettiWidget(
             confettiController: _controllerCenterRight,
             blastDirection: pi, // radial value - LEFT
-            emissionFrequency: 0.05,
-            numberOfParticles: 10,
-            gravity: 0,
+            particleDrag: 0.05, // apply drag to the confetti
+            emissionFrequency: 0.05, // how often it should emit
+            numberOfParticles: 20, // number of particles to emit
+            gravity: 0.05, // gravity - or fall speed
             shouldLoop: false,
             colors: [
               Colors.green,
@@ -83,7 +115,8 @@ class _MyAppState extends State<MyApp> {
               },
               child: _display('pump left')),
         ),
-        //CENTER LEFT
+
+        //CENTER LEFT - Emit right
         Align(
           alignment: Alignment.centerLeft,
           child: ConfettiWidget(
@@ -104,18 +137,19 @@ class _MyAppState extends State<MyApp> {
               onPressed: () {
                 _controllerCenterLeft.play();
               },
-              child: _display('single shooter')),
+              child: _display('singles')),
         ),
-        //TOP CENTER
+
+        //TOP CENTER - shoot down
         Align(
           alignment: Alignment.topCenter,
           child: ConfettiWidget(
             confettiController: _controllerTopCenter,
             blastDirection: pi / 2,
-            maxBlastForce: 5,
-            minBlastForce: 2,
+            maxBlastForce: 5, // set a lower max blast force
+            minBlastForce: 2, // set a lower min blast force
             emissionFrequency: 0.05,
-            numberOfParticles: 50,
+            numberOfParticles: 50, // a lot of particles at once
             gravity: 1,
           ),
         ),
