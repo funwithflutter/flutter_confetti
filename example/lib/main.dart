@@ -64,7 +64,7 @@ class _MyAppState extends State<MyApp> {
             blastDirection: pi, // radial value - LEFT
             emissionFrequency: 0.05,
             numberOfParticles: 10,
-            fallingSpeed: 10,
+            gravity: 0,
             shouldLoop: false,
             colors: [
               Colors.green,
@@ -93,7 +93,7 @@ class _MyAppState extends State<MyApp> {
             maximumSize: const Size(50,
                 50), // set the maximum potential size for the confetti (width, height)
             numberOfParticles: 1,
-            fallingSpeed: 100,
+            gravity: 0.1,
           ),
         ),
         Align(
@@ -114,7 +114,7 @@ class _MyAppState extends State<MyApp> {
             minBlastForce: 2,
             emissionFrequency: 0.05,
             numberOfParticles: 50,
-            fallingSpeed: 10,
+            gravity: 1,
           ),
         ),
         Align(
@@ -135,7 +135,7 @@ class _MyAppState extends State<MyApp> {
             numberOfParticles: 20,
             maxBlastForce: 100,
             minBlastForce: 80,
-            fallingSpeed: 10,
+            gravity: 0.3,
           ),
         ),
         Align(
