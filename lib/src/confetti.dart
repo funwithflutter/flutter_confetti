@@ -252,7 +252,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   @override
   void dispose() {
-    print('dispose called');
     _animController.dispose();
     widget.confettiController.removeListener(_handleChange);
     _particleSystem.removeListener(_particleSystemListener);
@@ -340,7 +339,9 @@ class ParticlePainter extends CustomPainter {
 
 class ConfettiController extends ChangeNotifier {
   ConfettiController({this.duration = const Duration(seconds: 30)})
-      : assert(duration != null);
+      : assert(duration != null &&
+            !duration.isNegative &&
+            duration.inMicroseconds > 0);
 
   Duration duration;
 
