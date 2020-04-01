@@ -17,6 +17,7 @@ To begin you need to instantiate a `ConfettiController` variable and pass in a `
 In the `build` method return a `ConfettiWidget`. The only attribute that is required is the `ConfettiController`.
 
 Other attributes that can be set are:
+* `blastDirectionality` -> an enum value to state if the particles shoot in random directions or a specific direction. `BlastDirectionality.explosive` will shoot in random directions and don't require a `blastDirection` to be set. `BlastDirectionality.directional` requires a `blastDirection` to specify the direction of the confetti.
 * `blastDirection` -> a radial value to determine the direction of the particle emission. The default is set to `PI` (180 degrees). A value of `PI` will emit to the left of the canvas/screen.
 * `emissionFrequency` -> should be a value between 0 and 1. The higher the value the higher the likelihood that particles will be emitted on a single frame. Default is set to `0.02` (2% chance)
 * `numberOfParticles` -> the number of particles to be emitted per emission. Default is set to `10`
@@ -27,6 +28,8 @@ Other attributes that can be set are:
 * `colors` -> a list of colors can be provided to manually set the confetti colors. If omitted then random colors will be used. A single color, for example `[Colors.blue]`, or multiple colors `[Colors.blue, Colors.red, Colors.green]` can be provided as an argument in the `ConfettiWidget
 * `minimumSize` -> a `Size` controlling the minimum possible size of the confetti. To be used in conjuction with `maximumSize`. For example, setting a `minimumSize` equal to `Size(10,10)` will ensure that the confetti will never be smaller than the specified size. Must be positive and smaller than the `maximumSize`. Can not be null.
 * `maximumSize` -> a `Size` controlling the maximum possible size of the confetti. To be used in conjuction with `minimumSize`. For example, setting a `maximumSize` equal to `Size(100,100)` will create confetti with a size somewhere between the minimum and maximum size of (100, 100) [widht, height]. Must be positive and bigger than the `minimumSize`, Can not be null.
+* `gravity` -> change the speed at which the confetti falls. A value between 0 and 1. The higher the value the faster it will fall. Default is set to `0.1`
+* `particleDrag` -> configure the drag force to apply to the confetti. A value between 0 and 1. A value of 1 will be no drag at all, while 0.1, for example, will be a lot of drag. Default is set to `0.05`
 
 Enjoy the confetti.
 

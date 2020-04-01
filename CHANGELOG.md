@@ -1,3 +1,10 @@
+## [0.4.0]
+This update will result in a change in the default falling speed (gravity) and drag of the confetti. You may note a difference, and might be required to modify some of these paramaters to achieve the desired result
+
+* Added an optional `gravity` to change the speed at which the confetti falls
+* Added an optional `blastDirectionality` property. The default is `BlastDirectionality.directional` where you can specify a `blastDirection` to shoot the confetti in a specific direction. Change to `BlastDirectionality.explosive` to blast confetti in random directions
+* Added an optional `particleDrag` property to configure the drag to apply to the confetti
+
 ## [0.3.0]
 * Provide an optional `minimumSize` and `maximumSize` to customize the size of the confetti. For example, setting a `minimumSize` equal to `Size(10,10)` and a `maximumSize` equal to `Size(20,20)` will create confetti with a size between these two parameters. Can be provided as an argument in the `ConfettiWidget`
 
