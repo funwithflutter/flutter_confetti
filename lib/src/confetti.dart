@@ -14,6 +14,7 @@ class ConfettiWidget extends StatefulWidget {
     this.minBlastForce = 5,
     this.blastDirectionality = BlastDirectionality.directional,
     this.blastDirection = pi,
+    this.gravity = 0.3,
     this.shouldLoop = false,
     this.displayTarget = false,
     this.colors,
@@ -35,6 +36,7 @@ class ConfettiWidget extends StatefulWidget {
             maxBlastForce > 0 &&
             minBlastForce > 0 &&
             maxBlastForce > minBlastForce),
+        assert(gravity >= 0 && gravity <= 1),
         super(key: key);
 
   /// The [ConfettiController] must not be null.
@@ -55,6 +57,12 @@ class ConfettiWidget extends StatefulWidget {
   /// The [blastDirection] is a radial value to determine the direction of the particle emission.
   /// The default is set to `PI` (180 degrees). A value of `PI` will emit to the left of the canvas/screen.
   final double blastDirection;
+
+  /// The [gravity] is the speed at which the confetti will fall.
+  /// The higher the [gravity] the faster it will fall.
+  ///
+  /// It can be set to a value between `0` and `1`
+  final double gravity;
 
   /// The [emissionFrequency] should be a value between 0 and 1. The higher the value the higher the
   /// likelihood that particles will be emitted on a single frame. Default is set to `0.02` (2% chance)
@@ -85,7 +93,7 @@ class ConfettiWidget extends StatefulWidget {
   /// Set your own custom particle drag, affective the movement of the confetti.
   /// Using 1.0 will give no drag at all, while using 0.1 will give a lot of drag. Default is set to `0.05`.
   final double particleDrag;
-  
+
   /// Child widget to display
   final Widget child;
 
@@ -101,23 +109,27 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   Animation<double> _animation;
   ParticleSystem _particleSystem;
 
-  double get _randomBlastDirection => vmath.radians(Random().nextInt(359).toDouble());
+  double get _randomBlastDirection =>
+      vmath.radians(Random().nextInt(359).toDouble());
 
   @override
   void initState() {
     widget.confettiController.addListener(_handleChange);
 
     _particleSystem = ParticleSystem(
-      emissionFrequency: widget.emissionFrequency,
-      numberOfParticles: widget.numberOfParticles,
-      maxBlastForce: widget.maxBlastForce,
-      minBlastForce: widget.minBlastForce,
-      blastDirection: widget.blastDirectionality == BlastDirectionality.directional ? widget.blastDirection : _randomBlastDirection,
-      colors: widget.colors,
-      minimumSize: widget.minimumSize,
-      maximumsize: widget.maximumSize,
-      particleDrag: widget.particleDrag
-    );
+        emissionFrequency: widget.emissionFrequency,
+        numberOfParticles: widget.numberOfParticles,
+        maxBlastForce: widget.maxBlastForce,
+        minBlastForce: widget.minBlastForce,
+        gravity: widget.gravity,
+        blastDirection:
+            widget.blastDirectionality == BlastDirectionality.directional
+                ? widget.blastDirection
+                : _randomBlastDirection,
+        colors: widget.colors,
+        minimumSize: widget.minimumSize,
+        maximumsize: widget.maximumSize,
+        particleDrag: widget.particleDrag);
 
     _particleSystem.addListener(_particleSystemListener);
 
@@ -330,10 +342,7 @@ enum ConfettiControllerState {
   stopped,
 }
 
-enum BlastDirectionality {
-  directional,
-  explosive
-}
+enum BlastDirectionality { directional, explosive }
 
 class ConfettiController extends ChangeNotifier {
   ConfettiController({this.duration = const Duration(seconds: 30)})

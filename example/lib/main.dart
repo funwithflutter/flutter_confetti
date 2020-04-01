@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:flutter/material.dart';
 
-void main() => runApp(ConfettiSample());
+void main() => runApp(const ConfettiSample());
 
 class ConfettiSample extends StatelessWidget {
   const ConfettiSample({Key key}) : super(key: key);
@@ -30,16 +30,18 @@ class _MyAppState extends State<MyApp> {
   ConfettiController _controllerCenterRight;
   ConfettiController _controllerCenterLeft;
   ConfettiController _controllerTopCenter;
-  ConfettiController _controllerBottonCenter;
+  ConfettiController _controllerBottomCenter;
 
   @override
   void initState() {
     _controllerCenterRight =
-        ConfettiController(duration: Duration(seconds: 10));
-    _controllerCenterLeft = ConfettiController(duration: Duration(seconds: 10));
-    _controllerTopCenter = ConfettiController(duration: Duration(seconds: 10));
-    _controllerBottonCenter =
-        ConfettiController(duration: Duration(seconds: 10));
+        ConfettiController(duration: const Duration(seconds: 10));
+    _controllerCenterLeft =
+        ConfettiController(duration: const Duration(seconds: 10));
+    _controllerTopCenter =
+        ConfettiController(duration: const Duration(seconds: 10));
+    _controllerBottomCenter =
+        ConfettiController(duration: const Duration(seconds: 10));
     super.initState();
   }
 
@@ -48,7 +50,7 @@ class _MyAppState extends State<MyApp> {
     _controllerCenterRight.dispose();
     _controllerCenterLeft.dispose();
     _controllerTopCenter.dispose();
-    _controllerBottonCenter.dispose();
+    _controllerBottomCenter.dispose();
     super.dispose();
   }
 
@@ -64,8 +66,13 @@ class _MyAppState extends State<MyApp> {
             blastDirection: pi, // radial value - LEFT
             emissionFrequency: 0.05,
             numberOfParticles: 10,
+            gravity: 0,
             shouldLoop: false,
-            colors: [Colors.green, Colors.blue, Colors.pink], // manually specify the colors to be used
+            colors: [
+              Colors.green,
+              Colors.blue,
+              Colors.pink
+            ], // manually specify the colors to be used
           ),
         ),
         Align(
@@ -83,9 +90,12 @@ class _MyAppState extends State<MyApp> {
             confettiController: _controllerCenterLeft,
             blastDirection: 0, // radial value - RIGHT
             emissionFrequency: 0.6,
-            minimumSize: const Size(10,10), // set the minimum potential size for the confetti (width, height)
-            maximumSize: const Size(50,50), // set the maximum potential size for the confetti (width, height)
+            minimumSize: const Size(10,
+                10), // set the minimum potential size for the confetti (width, height)
+            maximumSize: const Size(50,
+                50), // set the maximum potential size for the confetti (width, height)
             numberOfParticles: 1,
+            gravity: 0.1,
           ),
         ),
         Align(
@@ -106,6 +116,7 @@ class _MyAppState extends State<MyApp> {
             minBlastForce: 2,
             emissionFrequency: 0.05,
             numberOfParticles: 50,
+            gravity: 1,
           ),
         ),
         Align(
@@ -120,19 +131,20 @@ class _MyAppState extends State<MyApp> {
         Align(
           alignment: Alignment.bottomCenter,
           child: ConfettiWidget(
-            confettiController: _controllerBottonCenter,
+            confettiController: _controllerBottomCenter,
             blastDirection: -pi / 2,
             emissionFrequency: 0.01,
             numberOfParticles: 20,
             maxBlastForce: 100,
             minBlastForce: 80,
+            gravity: 0.3,
           ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
           child: FlatButton(
               onPressed: () {
-                _controllerBottonCenter.play();
+                _controllerBottomCenter.play();
               },
               child: _display('hard and infrequent')),
         ),
