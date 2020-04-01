@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:random_color/random_color.dart';
@@ -21,7 +22,8 @@ class ParticleSystem extends ChangeNotifier {
       @required double blastDirection,
       @required List<Color> colors,
       @required Size minimumSize,
-      @required Size maximumsize})
+      @required Size maximumsize,
+      double gravity = 0.3})
       : assert(emissionFrequency != null &&
             numberOfParticles != null &&
             maxBlastForce != null &&
@@ -40,7 +42,9 @@ class ParticleSystem extends ChangeNotifier {
             maximumsize.height > 0 &&
             minimumSize.width <= maximumsize.width &&
             minimumSize.height <= maximumsize.height),
+        assert(gravity >= 0 && gravity <= 1),
         _blastDirection = blastDirection,
+        _gravity = gravity,
         _maxBlastForce = maxBlastForce,
         _minBlastForce = minBlastForce,
         _frequency = emissionFrequency,
@@ -61,6 +65,7 @@ class ParticleSystem extends ChangeNotifier {
   final double _maxBlastForce;
   final double _minBlastForce;
   final double _blastDirection;
+  final double _gravity;
   final List<Color> _colors;
   final Size _minimumSize;
   final Size _maximumSize;
@@ -153,8 +158,8 @@ class ParticleSystem extends ChangeNotifier {
   List<Particle> _generateParticles({int number = 1}) {
     return List<Particle>.generate(
         number,
-        (i) =>
-            Particle(_generateParticleForce(), _randomColor(), _randomSize()));
+        (i) => Particle(
+            _generateParticleForce(), _randomColor(), _randomSize(), _gravity));
   }
 
   vmath.Vector2 _generateParticleForce() {
@@ -184,7 +189,7 @@ class ParticleSystem extends ChangeNotifier {
 }
 
 class Particle {
-  Particle(vmath.Vector2 startUpForce, Color color, Size size)
+  Particle(vmath.Vector2 startUpForce, Color color, Size size, double gravity)
       : _startUpForce = startUpForce,
         _color = color,
         _mass = randomize(1, 11),
@@ -195,7 +200,8 @@ class Particle {
         // _size = Size(randomize(20, 30), randomize(10, 15)),
         _aVelocityX = randomize(-0.1, 0.1),
         _aVelocityY = randomize(-0.1, 0.1),
-        _aVelocityZ = randomize(-0.1, 0.1);
+        _aVelocityZ = randomize(-0.1, 0.1),
+        _gravity = lerpDouble(0.1, 5, gravity);
 
   final vmath.Vector2 _startUpForce;
 
@@ -209,6 +215,7 @@ class Particle {
   double _aVelocityY;
   double _aZ = 0;
   double _aVelocityZ;
+  final double _gravity;
   final _aAcceleration = 0.0001;
 
   final Color _color;
@@ -254,7 +261,7 @@ class Particle {
 
     _timeAlive += 1;
 
-    applyForce(vmath.Vector2(0, 0.3));
+    applyForce(vmath.Vector2(0, _gravity));
 
     _velocity.add(_acceleration);
     _location.add(_velocity);
