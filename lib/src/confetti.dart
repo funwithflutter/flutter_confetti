@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:confetti/src/particle.dart';
+import 'package:vector_math/vector_math.dart' as vmath;
 
 class ConfettiWidget extends StatefulWidget {
   const ConfettiWidget({
@@ -11,6 +12,7 @@ class ConfettiWidget extends StatefulWidget {
     this.numberOfParticles = 10,
     this.maxBlastForce = 20,
     this.minBlastForce = 5,
+    this.blastDirectionality = BlastDirectionality.directional,
     this.blastDirection = pi,
     this.gravity = 0.3,
     this.shouldLoop = false,
@@ -18,6 +20,7 @@ class ConfettiWidget extends StatefulWidget {
     this.colors,
     this.minimumSize = const Size(20, 10),
     this.maximumSize = const Size(30, 15),
+    this.particleDrag = 0.05,
     this.child,
   })  : assert(
             confettiController != null,
@@ -25,6 +28,7 @@ class ConfettiWidget extends StatefulWidget {
                 numberOfParticles != null &&
                 maxBlastForce != null &&
                 minBlastForce != null &&
+                blastDirectionality != null &&
                 blastDirection != null),
         assert(emissionFrequency >= 0 &&
             emissionFrequency <= 1 &&
@@ -45,6 +49,10 @@ class ConfettiWidget extends StatefulWidget {
   /// The [maxBlastForce] and [minBlastForce] will determine the maximum and minimum blast force applied to
   /// a particle within it's first 5 frames of life. The default [minBlastForce] is set to `5`
   final double minBlastForce;
+
+  /// The [blastDirectionality] is an enum that takes one of two values - directional or explosive.
+  /// The default is set to directional
+  final BlastDirectionality blastDirectionality;
 
   /// The [blastDirection] is a radial value to determine the direction of the particle emission.
   /// The default is set to `PI` (180 degrees). A value of `PI` will emit to the left of the canvas/screen.
@@ -82,6 +90,10 @@ class ConfettiWidget extends StatefulWidget {
   /// Must be bigger than the [minimumSize] attribute. Cannot be null
   final Size maximumSize;
 
+  /// Set your own custom particle drag, affective the movement of the confetti.
+  /// Using 1.0 will give no drag at all, while using 0.1 will give a lot of drag. Default is set to `0.05`.
+  final double particleDrag;
+
   /// Child widget to display
   final Widget child;
 
@@ -97,21 +109,27 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   Animation<double> _animation;
   ParticleSystem _particleSystem;
 
+  double get _randomBlastDirection =>
+      vmath.radians(Random().nextInt(359).toDouble());
+
   @override
   void initState() {
     widget.confettiController.addListener(_handleChange);
 
     _particleSystem = ParticleSystem(
-      emissionFrequency: widget.emissionFrequency,
-      numberOfParticles: widget.numberOfParticles,
-      maxBlastForce: widget.maxBlastForce,
-      minBlastForce: widget.minBlastForce,
-      blastDirection: widget.blastDirection,
-      gravity: widget.gravity,
-      colors: widget.colors,
-      minimumSize: widget.minimumSize,
-      maximumsize: widget.maximumSize,
-    );
+        emissionFrequency: widget.emissionFrequency,
+        numberOfParticles: widget.numberOfParticles,
+        maxBlastForce: widget.maxBlastForce,
+        minBlastForce: widget.minBlastForce,
+        gravity: widget.gravity,
+        blastDirection:
+            widget.blastDirectionality == BlastDirectionality.directional
+                ? widget.blastDirection
+                : _randomBlastDirection,
+        colors: widget.colors,
+        minimumSize: widget.minimumSize,
+        maximumsize: widget.maximumSize,
+        particleDrag: widget.particleDrag);
 
     _particleSystem.addListener(_particleSystemListener);
 
@@ -323,6 +341,8 @@ enum ConfettiControllerState {
   playing,
   stopped,
 }
+
+enum BlastDirectionality { directional, explosive }
 
 class ConfettiController extends ChangeNotifier {
   ConfettiController({this.duration = const Duration(seconds: 30)})

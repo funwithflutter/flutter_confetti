@@ -23,6 +23,7 @@ class ParticleSystem extends ChangeNotifier {
       @required List<Color> colors,
       @required Size minimumSize,
       @required Size maximumsize,
+      @required double particleDrag,
       double gravity = 0.3})
       : assert(emissionFrequency != null &&
             numberOfParticles != null &&
@@ -30,7 +31,8 @@ class ParticleSystem extends ChangeNotifier {
             minBlastForce != null &&
             blastDirection != null &&
             minimumSize != null &&
-            maximumsize != null),
+            maximumsize != null &&
+            particleDrag != null),
         assert(maxBlastForce > 0 &&
             minBlastForce > 0 &&
             emissionFrequency >= 0 &&
@@ -41,6 +43,8 @@ class ParticleSystem extends ChangeNotifier {
             maximumsize.width > 0 &&
             maximumsize.height > 0 &&
             minimumSize.width <= maximumsize.width &&
+            minimumSize.height <= maximumsize.height &&
+            particleDrag > 0.0 &&
             minimumSize.height <= maximumsize.height),
         assert(gravity >= 0 && gravity <= 1),
         _blastDirection = blastDirection,
@@ -52,6 +56,7 @@ class ParticleSystem extends ChangeNotifier {
         _colors = colors,
         _minimumSize = minimumSize,
         _maximumSize = maximumsize,
+        _particleDrag = particleDrag,
         _rand = Random();
 
   ParticleSystemStatus _particleSystemStatus;
@@ -69,6 +74,7 @@ class ParticleSystem extends ChangeNotifier {
   final List<Color> _colors;
   final Size _minimumSize;
   final Size _maximumSize;
+  final double _particleDrag;
 
   Offset _particleSystemPosition;
   Size _screenSize;
@@ -158,8 +164,8 @@ class ParticleSystem extends ChangeNotifier {
   List<Particle> _generateParticles({int number = 1}) {
     return List<Particle>.generate(
         number,
-        (i) => Particle(
-            _generateParticleForce(), _randomColor(), _randomSize(), _gravity));
+        (i) => Particle(_generateParticleForce(), _randomColor(), _randomSize(),
+            _gravity, _particleDrag));
   }
 
   vmath.Vector2 _generateParticleForce() {
@@ -189,10 +195,12 @@ class ParticleSystem extends ChangeNotifier {
 }
 
 class Particle {
-  Particle(vmath.Vector2 startUpForce, Color color, Size size, double gravity)
+  Particle(vmath.Vector2 startUpForce, Color color, Size size, double gravity,
+      double particleDrag)
       : _startUpForce = startUpForce,
         _color = color,
         _mass = randomize(1, 11),
+        _particleDrag = particleDrag,
         _location = vmath.Vector2.zero(),
         _acceleration = vmath.Vector2.zero(),
         _velocity = vmath.Vector2(randomize(-3, 3), randomize(-3, 3)),
@@ -209,6 +217,7 @@ class Particle {
   final vmath.Vector2 _velocity;
   final vmath.Vector2 _acceleration;
 
+  double _particleDrag;
   double _aX = 0;
   double _aVelocityX;
   double _aY = 0;
@@ -231,9 +240,8 @@ class Particle {
   }
 
   void drag() {
-    const c = 0.05;
     final speed = sqrt(pow(_velocity.x, 2) + pow(_velocity.y, 2));
-    final dragMagnitude = c * speed * speed;
+    final dragMagnitude = _particleDrag * speed * speed;
     final drag = _velocity.clone();
     drag.multiply(vmath.Vector2.all(-1));
     drag.normalize();
