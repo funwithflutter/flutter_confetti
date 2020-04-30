@@ -1,3 +1,7 @@
+## [0.5.0]
+Massive performance improvements. Should see a significant performance boost when running the application in profile/release mode. It is now possible to add a lot more confetti without the application causing jank. It is recommended to test the use of this package on multiple devices, to ensure it does not introduce performance issues on older devices.
+
+
 ## [0.4.0]
 This update will result in a change in the default falling speed (gravity) and drag of the confetti. You may note a difference, and might be required to modify some of these paramaters to achieve the desired result
 

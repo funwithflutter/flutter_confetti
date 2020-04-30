@@ -33,4 +33,4 @@ Other attributes that can be set are:
 
 Enjoy the confetti.
 
-*NOTE:* Don't be greedy with the number of particles. Too many will result in performance issues. Future versions might be more performant. Use wisely and carefully.
+*NOTE:* Don't be greedy with the number of particles. The more particles that are on screen the more calculations need to be performed. Performance improvements have been made, however this is still ongoing work. Too many particles will result in performance issues. Use wisely and carefully.
