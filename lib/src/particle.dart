@@ -220,8 +220,8 @@ class Particle {
         _location = vmath.Vector2.zero(),
         _acceleration = vmath.Vector2.zero(),
         _velocity = vmath.Vector2(randomize(-3, 3), randomize(-3, 3)),
-        _size = size,
-        // _size = Size(randomize(20, 30), randomize(10, 15)),
+        // _size = size,
+        _pathShape = createPath(size),
         _aVelocityX = randomize(-0.1, 0.1),
         _aVelocityY = randomize(-0.1, 0.1),
         _aVelocityZ = randomize(-0.1, 0.1),
@@ -245,9 +245,19 @@ class Particle {
 
   final Color _color;
   final double _mass;
-  final Size _size;
+  final Path _pathShape;
 
   double _timeAlive = 0;
+
+  static Path createPath(Size size) {
+    final pathShape = Path();
+    pathShape.moveTo(0, 0);
+    pathShape.lineTo(-size.width, 0);
+    pathShape.lineTo(-size.width, size.height);
+    pathShape.lineTo(0, size.height);
+    pathShape.close();
+    return pathShape;
+  }
 
   void applyForce(vmath.Vector2 force) {
     final f = force.clone();
@@ -289,7 +299,7 @@ class Particle {
 
     _velocity.add(_acceleration);
     _location.add(_velocity);
-    _acceleration.multiply(vmath.Vector2.zero());
+    _acceleration.setZero();
 
     _aVelocityX += _aAcceleration / _mass;
     _aVelocityY += _aAcceleration / _mass;
@@ -307,7 +317,7 @@ class Particle {
   }
 
   Color get color => _color;
-  Size get size => _size;
+  Path get path => _pathShape;
 
   double get angleX => _aX;
   double get angleY => _aY;

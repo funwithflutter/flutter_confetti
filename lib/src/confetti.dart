@@ -123,9 +123,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
         minBlastForce: widget.minBlastForce,
         gravity: widget.gravity,
         blastDirection: widget.blastDirection,
-        // widget.blastDirectionality == BlastDirectionality.directional
-        //     ? widget.blastDirection
-        //     : _randomBlastDirection,
         blastDirectionality: widget.blastDirectionality,
         colors: widget.colors,
         minimumSize: widget.minimumSize,
@@ -161,7 +158,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
         ConfettiControllerState.stopped) {
       _stopEmission();
     }
-    setState(() {});
   }
 
   void _animationListener() {
@@ -170,8 +166,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
       return;
     }
     _particleSystem.update();
-
-    setState(() {});
   }
 
   void _animationStatusListener(AnimationStatus status) {
@@ -240,13 +234,16 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      key: _particleSystemKey,
-      foregroundPainter: ParticlePainter(
-        particles: _particleSystem.particles,
-        paintEmitterTarget: widget.displayTarget,
+    return RepaintBoundary(
+      child: CustomPaint(
+        key: _particleSystemKey,
+        foregroundPainter: ParticlePainter(
+          _animController,
+          particles: _particleSystem.particles,
+          paintEmitterTarget: widget.displayTarget,
+        ),
+        child: widget.child,
       ),
-      child: widget.child,
     );
   }
 
@@ -261,7 +258,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 }
 
 class ParticlePainter extends CustomPainter {
-  ParticlePainter(
+  ParticlePainter(Listenable repaint,
       {@required this.particles,
       paintEmitterTarget = true,
       emitterTargetColor = Colors.black})
@@ -272,7 +269,8 @@ class ParticlePainter extends CustomPainter {
           ..strokeWidth = 2.0,
         _particlePaint = Paint()
           ..color = Colors.green
-          ..style = PaintingStyle.fill;
+          ..style = PaintingStyle.fill,
+        super(repaint: repaint);
 
   final List<Particle> particles;
 
@@ -291,6 +289,7 @@ class ParticlePainter extends CustomPainter {
     _paintParticles(canvas);
   }
 
+  // TODO: seperate this
   void _paintEmitter(Canvas canvas) {
     const radius = 10.0;
     canvas.drawCircle(Offset.zero, radius, _emitterPaint);
@@ -302,32 +301,17 @@ class ParticlePainter extends CustomPainter {
     canvas.drawPath(path, _emitterPaint);
   }
 
-  Matrix4 rotationMatrix4;
-  Path pathShape;
-  Path rotatedPath;
-  Path drawPath;
-
   void _paintParticles(Canvas canvas) {
     for (final particle in particles) {
-      // final rotationMatrix4 = Matrix4.identity()
-      //   ..rotateY(particle.angleY)
-      //   ..rotateX(particle.angleX)
-      //   ..rotateZ(particle.angleZ);
-      rotationMatrix4 = Matrix4.identity();
+      final rotationMatrix4 = Matrix4.identity();
       rotationMatrix4
-        ..rotateY(particle.angleY)
+        ..translate(particle.location.dx, particle.location.dy)
         ..rotateX(particle.angleX)
+        ..rotateY(particle.angleY)
         ..rotateZ(particle.angleZ);
 
-      pathShape = Path();
-      pathShape.moveTo(0, 0);
-      pathShape.lineTo(-particle.size.width, 0);
-      pathShape.lineTo(-particle.size.width, particle.size.height);
-      pathShape.lineTo(0, particle.size.height);
-      pathShape.close();
-      rotatedPath = pathShape.transform(rotationMatrix4.storage);
-      drawPath = rotatedPath.shift(particle.location);
-      canvas.drawPath(drawPath, _particlePaint..color = particle.color);
+      final finalPath = particle.path.transform(rotationMatrix4.storage);
+      canvas.drawPath(finalPath, _particlePaint..color = particle.color);
     }
   }
 

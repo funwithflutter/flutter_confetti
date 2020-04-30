@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
                 .explosive, // don't specify a direction, blast randomly
             shouldLoop:
                 true, // start again as soon as the animation is finished
-            colors: [
+            colors: const [
               Colors.green,
               Colors.blue,
               Colors.pink,
@@ -100,7 +100,7 @@ class _MyAppState extends State<MyApp> {
             numberOfParticles: 20, // number of particles to emit
             gravity: 0.05, // gravity - or fall speed
             shouldLoop: false,
-            colors: [
+            colors: const [
               Colors.green,
               Colors.blue,
               Colors.pink
@@ -189,7 +189,7 @@ class _MyAppState extends State<MyApp> {
   Text _display(String text) {
     return Text(
       text,
-      style: TextStyle(color: Colors.white, fontSize: 20),
+      style: const TextStyle(color: Colors.white, fontSize: 20),
     );
   }
 }
