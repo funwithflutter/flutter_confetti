@@ -1,3 +1,6 @@
+## [0.5.2]
+Fix where at certain times the Confetti widget takes too long to emit. This update ensures that particles are generated on the first frame, and when there are no longer any particles on the screen but the animation is still running.
+
 ## [0.5.1]
 Fixed layout issue where the screen size and confetti position were not updated on layout changes. The package will now respond to screen layout and sizing changes.
 
