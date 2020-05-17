@@ -125,6 +125,13 @@ class ParticleSystem extends ChangeNotifier {
     }
 
     if (_particleSystemStatus == ParticleSystemStatus.started) {
+      // If there are no particles then immediately generate particles
+      // This also ensures that particles are emitted on the first frame
+      if (particles.isEmpty) {
+        _particles.addAll(_generateParticles(number: _numberOfParticles));
+        return;
+      }
+
       // Determines whether to generate new particles based on the [frequency]
       final chanceToGenerate = _rand.nextDouble();
       if (chanceToGenerate < _frequency) {
