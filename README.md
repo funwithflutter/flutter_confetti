@@ -1,7 +1,7 @@
 Blast some confetti all over the screen and celebrate user achievements!  
 
 ## Demo
-<img height="480px" src="https://media.giphy.com/media/ZA4gWAVlhx18f3fhMY/giphy.gif">
+[WEB Demo](https://funwithflutter.github.io/confetti/#/)
 
 A video walkthrough is available [here](https://www.youtube.com/watch?v=jvhw3cfj2rk).
 
