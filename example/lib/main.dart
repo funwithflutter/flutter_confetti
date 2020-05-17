@@ -11,8 +11,6 @@ class ConfettiSample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        showPerformanceOverlay: true,
         title: 'Confetti',
         home: Scaffold(
           backgroundColor: Colors.grey[900],
