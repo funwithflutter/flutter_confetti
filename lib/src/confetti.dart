@@ -112,6 +112,13 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   Animation<double> _animation;
   ParticleSystem _particleSystem;
 
+  /// Keeps track of emition position on screen layout changes
+  Offset _emitterPosition;
+
+  /// Keeps track of the screen size on layout changes
+  /// Controls the sizing restrictions for when confetti should be vissible
+  Size _screenSize = const Size(0, 0);
+
   @override
   void initState() {
     widget.confettiController.addListener(_handleChange);
@@ -134,7 +141,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     _initAnimation();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-        _onBuildComplete); // called to set the size of the screen
+        _onBuildComplete); // called to set the size of the screen and emitter position
   }
 
   void _initAnimation() {
@@ -213,13 +220,17 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   void _onBuildComplete(_) {
     _setScreenSize();
+    _setEmitterPosition();
   }
 
   void _setScreenSize() {
-    final position = _getContainerPosition();
-    final screenSize = _getScreenSize();
-    _particleSystem.particleSystemPosition = position;
-    _particleSystem.screenSize = screenSize;
+    _screenSize = _getScreenSize();
+    _particleSystem.screenSize = _screenSize;
+  }
+
+  void _setEmitterPosition() {
+    _emitterPosition = _getContainerPosition();
+    _particleSystem.particleSystemPosition = _emitterPosition;
   }
 
   Offset _getContainerPosition() {
@@ -232,8 +243,25 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     return MediaQuery.of(context).size;
   }
 
+  /// On layout change update the position of the emitter
+  /// and the screen size
+  ///
+  /// Only update the emitter if it has already been set.
+  /// To avoid RenderObject issues.
+  /// The emitter position is first set in the [addPostFrameCallback]
+  /// in [initState]
+  void _updatePositionAndSize() {
+    if (_getScreenSize() != _screenSize) {
+      _setScreenSize();
+      if (_emitterPosition != null) {
+        _setEmitterPosition();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    _updatePositionAndSize();
     return RepaintBoundary(
       child: CustomPaint(
         key: _particleSystemKey,

@@ -1,3 +1,6 @@
+## [0.5.1]
+Fixed layout issue where the screen size and confetti position were not updated on layout changes. The package will now respond to screen layout and sizing changes.
+
 ## [0.5.0]
 Massive performance improvements. Should see a significant performance boost when running the application in profile/release mode. It is now possible to add a lot more confetti without the application causing jank. It is recommended to test the use of this package on multiple devices, to ensure it does not introduce performance issues on older devices.
 
