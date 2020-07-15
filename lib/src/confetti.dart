@@ -23,6 +23,7 @@ class ConfettiWidget extends StatefulWidget {
     this.minimumSize = const Size(20, 10),
     this.maximumSize = const Size(30, 15),
     this.particleDrag = 0.05,
+    this.canvas,
     this.child,
   })  : assert(
             confettiController != null,
@@ -96,6 +97,10 @@ class ConfettiWidget extends StatefulWidget {
   /// An optional parameter to specify drag force, effecting the movement of the confetti.
   /// Using `1.0` will give no drag at all, while, for example, using `0.1` will give a lot of drag. Default is set to `0.05`.
   final double particleDrag;
+
+  /// An optional parameter to specify the area size where the confetti will be thrown.
+  /// By default this is set to screen size.
+  final Size canvas;
 
   /// Child widget to display
   final Widget child;
@@ -240,7 +245,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   Size _getScreenSize() {
-    return MediaQuery.of(context).size;
+    return widget.canvas ?? MediaQuery.of(context).size;
   }
 
   /// On layout change update the position of the emitter
