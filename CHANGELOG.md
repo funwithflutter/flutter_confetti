@@ -1,3 +1,6 @@
+## [0.5.3]
+Add `canvas` parameter.
+
 ## [0.5.2]
 Fix where at certain times the Confetti widget takes too long to emit. This update ensures that particles are generated on the first frame, and when there are no longer any particles on the screen but the animation is still running.
 
