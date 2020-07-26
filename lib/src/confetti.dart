@@ -145,8 +145,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
     _initAnimation();
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-        _onBuildComplete); // called to set the size of the screen and emitter position
   }
 
   void _initAnimation() {
@@ -210,6 +208,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   void _startAnimation() {
     // debugPrint('START animation');
+    _setScreenSize();
+    _setEmitterPosition();
     _animController.forward(from: 0);
   }
 
@@ -221,11 +221,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   void _continueAnimation() {
     // debugPrint('CONTINUE animation');
     _animController.forward(from: 0);
-  }
-
-  void _onBuildComplete(_) {
-    _setScreenSize();
-    _setEmitterPosition();
   }
 
   void _setScreenSize() {
@@ -282,6 +277,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   @override
   void dispose() {
+    widget.confettiController.stop();
     _animController.dispose();
     widget.confettiController.removeListener(_handleChange);
     _particleSystem.removeListener(_particleSystemListener);
