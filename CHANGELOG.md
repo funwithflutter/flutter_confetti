@@ -1,3 +1,7 @@
+## [0.5.4]
+Fix: Confetti emitter position set incorrectly when transitioning to a new PageView. The emitter position is now set on animation start.
+Fix: Set `ConfettiControllerState.stopped` on `ConfettiWidget` dispose.
+
 ## [0.5.3]
 Add `canvas` parameter.
 
