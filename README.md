@@ -30,6 +30,7 @@ Other attributes that can be set are:
 * `maximumSize` -> a `Size` controlling the maximum possible size of the confetti. To be used in conjuction with `minimumSize`. For example, setting a `maximumSize` equal to `Size(100,100)` will create confetti with a size somewhere between the minimum and maximum size of (100, 100) [widht, height]. Must be positive and bigger than the `minimumSize`, Can not be null.
 * `gravity` -> change the speed at which the confetti falls. A value between 0 and 1. The higher the value the faster it will fall. Default is set to `0.1`
 * `particleDrag` -> configure the drag force to apply to the confetti. A value between 0 and 1. A value of 1 will be no drag at all, while 0.1, for example, will be a lot of drag. Default is set to `0.05`
+* `canvas` -> set the size of the area where the confetti will be shown, by default this is set to full screen size.
 
 Enjoy the confetti.
 
