@@ -194,7 +194,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   void _startEmission() {
-    // debugPrint('START emission');
     _particleSystem.startParticleEmission();
   }
 
@@ -202,24 +201,23 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     if (_particleSystem.particleSystemStatus == ParticleSystemStatus.stopped) {
       return;
     }
-    // debugPrint('STOP emission');
     _particleSystem.stopParticleEmission();
   }
 
   void _startAnimation() {
-    // debugPrint('START animation');
-    _setScreenSize();
-    _setEmitterPosition();
-    _animController.forward(from: 0);
+    // Make sure widgets are built before setting screen size and position
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setScreenSize();
+      _setEmitterPosition();
+      _animController.forward(from: 0);
+    });
   }
 
   void _stopAnimation() {
-    // debugPrint('STOP animation');
     _animController.stop();
   }
 
   void _continueAnimation() {
-    // debugPrint('CONTINUE animation');
     _animController.forward(from: 0);
   }
 
