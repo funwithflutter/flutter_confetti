@@ -215,6 +215,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   void _stopAnimation() {
     _animController.stop();
+    widget.confettiController.stop();
   }
 
   void _continueAnimation() {
