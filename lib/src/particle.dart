@@ -330,6 +330,7 @@ class Particle {
 
   Color get color => _color;
   Path get path => _pathShape;
+
   double get angleX => _aX;
   double get angleY => _aY;
   double get angleZ => _aZ;
