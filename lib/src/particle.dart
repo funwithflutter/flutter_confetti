@@ -25,9 +25,10 @@ class ParticleSystem extends ChangeNotifier {
       @required BlastDirectionality blastDirectionality,
       @required List<Color> colors,
       @required Size minimumSize,
-      @required Size maximumsize,
+      @required Size maximumSize,
       @required double particleDrag,
-      @required double gravity})
+      @required double gravity,
+      Path Function(Size size) createParticlePath})
       : assert(
           emissionFrequency != null &&
               numberOfParticles != null &&
@@ -35,7 +36,7 @@ class ParticleSystem extends ChangeNotifier {
               minBlastForce != null &&
               blastDirection != null &&
               minimumSize != null &&
-              maximumsize != null &&
+              maximumSize != null &&
               particleDrag != null &&
               blastDirectionality != null,
         ),
@@ -46,13 +47,13 @@ class ParticleSystem extends ChangeNotifier {
             numberOfParticles > 0 &&
             minimumSize.width > 0 &&
             minimumSize.height > 0 &&
-            maximumsize.width > 0 &&
-            maximumsize.height > 0 &&
-            minimumSize.width <= maximumsize.width &&
-            minimumSize.height <= maximumsize.height &&
+            maximumSize.width > 0 &&
+            maximumSize.height > 0 &&
+            minimumSize.width <= maximumSize.width &&
+            minimumSize.height <= maximumSize.height &&
             particleDrag >= 0.0 &&
             particleDrag <= 1 &&
-            minimumSize.height <= maximumsize.height),
+            minimumSize.height <= maximumSize.height),
         assert(gravity >= 0 && gravity <= 1),
         _blastDirection = blastDirection,
         _blastDirectionality = blastDirectionality,
@@ -63,9 +64,10 @@ class ParticleSystem extends ChangeNotifier {
         _numberOfParticles = numberOfParticles,
         _colors = colors,
         _minimumSize = minimumSize,
-        _maximumSize = maximumsize,
+        _maximumSize = maximumSize,
         _particleDrag = particleDrag,
-        _rand = Random();
+        _rand = Random(),
+        _createParticlePath = createParticlePath;
 
   ParticleSystemStatus _particleSystemStatus;
 
@@ -84,6 +86,7 @@ class ParticleSystem extends ChangeNotifier {
   final Size _minimumSize;
   final Size _maximumSize;
   final double _particleDrag;
+  final Path Function(Size size) _createParticlePath;
 
   Offset _particleSystemPosition;
   Size _screenSize;
@@ -181,7 +184,7 @@ class ParticleSystem extends ChangeNotifier {
     return List<Particle>.generate(
         number,
         (i) => Particle(_generateParticleForce(), _randomColor(), _randomSize(),
-            _gravity, _particleDrag));
+            _gravity, _particleDrag, _createParticlePath));
   }
 
   double get _randomBlastDirection =>
@@ -219,7 +222,7 @@ class ParticleSystem extends ChangeNotifier {
 
 class Particle {
   Particle(vmath.Vector2 startUpForce, Color color, Size size, double gravity,
-      double particleDrag)
+      double particleDrag, Path Function(Size size) createParticlePath)
       : _startUpForce = startUpForce,
         _color = color,
         _mass = randomize(1, 11),
@@ -228,7 +231,9 @@ class Particle {
         _acceleration = vmath.Vector2.zero(),
         _velocity = vmath.Vector2(randomize(-3, 3), randomize(-3, 3)),
         // _size = size,
-        _pathShape = createPath(size),
+        _pathShape = createParticlePath != null
+            ? createParticlePath(size)
+            : createPath(size),
         _aVelocityX = randomize(-0.1, 0.1),
         _aVelocityY = randomize(-0.1, 0.1),
         _aVelocityZ = randomize(-0.1, 0.1),
@@ -325,7 +330,6 @@ class Particle {
 
   Color get color => _color;
   Path get path => _pathShape;
-
   double get angleX => _aX;
   double get angleY => _aY;
   double get angleZ => _aZ;
