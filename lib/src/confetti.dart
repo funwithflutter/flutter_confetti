@@ -25,6 +25,7 @@ class ConfettiWidget extends StatefulWidget {
     this.particleDrag = 0.05,
     this.canvas,
     this.child,
+    this.createParticlePath,
   })  : assert(
             confettiController != null,
             emissionFrequency != null &&
@@ -60,6 +61,10 @@ class ConfettiWidget extends StatefulWidget {
   /// The [blastDirection] is a radial value to determine the direction of the particle emission.
   /// The default is set to `PI` (180 degrees). A value of `PI` will emit to the left of the canvas/screen.
   final double blastDirection;
+
+  /// The [createParticlePath] is optional function that returns custom Path needed to generate particles
+  /// The default function returns rectangular path
+  final Path Function(Size size) createParticlePath;
 
   /// The [gravity] is the speed at which the confetti will fall.
   /// The higher the [gravity] the faster it will fall.
@@ -138,8 +143,9 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
         blastDirectionality: widget.blastDirectionality,
         colors: widget.colors,
         minimumSize: widget.minimumSize,
-        maximumsize: widget.maximumSize,
-        particleDrag: widget.particleDrag);
+        maximumSize: widget.maximumSize,
+        particleDrag: widget.particleDrag,
+        createParticlePath: widget.createParticlePath);
 
     _particleSystem.addListener(_particleSystemListener);
 
