@@ -17,28 +17,18 @@ enum ParticleSystemStatus {
 
 class ParticleSystem extends ChangeNotifier {
   ParticleSystem(
-      {@required double emissionFrequency,
-      @required int numberOfParticles,
-      @required double maxBlastForce,
-      @required double minBlastForce,
-      @required double blastDirection,
-      @required BlastDirectionality blastDirectionality,
-      @required List<Color> colors,
-      @required Size minimumSize,
-      @required Size maximumsize,
-      @required double particleDrag,
-      @required double gravity})
-      : assert(
-          emissionFrequency != null &&
-              numberOfParticles != null &&
-              maxBlastForce != null &&
-              minBlastForce != null &&
-              blastDirection != null &&
-              minimumSize != null &&
-              maximumsize != null &&
-              particleDrag != null &&
-              blastDirectionality != null,
-        ),
+      {required double emissionFrequency,
+      required int numberOfParticles,
+      required double maxBlastForce,
+      required double minBlastForce,
+      required double blastDirection,
+      required BlastDirectionality blastDirectionality,
+      List<Color>? colors,
+      required Size minimumSize,
+      required Size maximumsize,
+      required double particleDrag,
+      required double gravity})
+      : 
         assert(maxBlastForce > 0 &&
             minBlastForce > 0 &&
             emissionFrequency >= 0 &&
@@ -67,7 +57,7 @@ class ParticleSystem extends ChangeNotifier {
         _particleDrag = particleDrag,
         _rand = Random();
 
-  ParticleSystemStatus _particleSystemStatus;
+  late ParticleSystemStatus _particleSystemStatus;
 
   final List<Particle> _particles = [];
 
@@ -80,21 +70,21 @@ class ParticleSystem extends ChangeNotifier {
   final double _blastDirection;
   final BlastDirectionality _blastDirectionality;
   final double _gravity;
-  final List<Color> _colors;
+  final List<Color>? _colors;
   final Size _minimumSize;
   final Size _maximumSize;
   final double _particleDrag;
 
-  Offset _particleSystemPosition;
-  Size _screenSize;
+  Offset? _particleSystemPosition;
+  Size? _screenSize;
 
-  double _bottomBorder;
-  double _rightBorder;
-  double _leftBorder;
+  late double _bottomBorder;
+  late double _rightBorder;
+  late double _leftBorder;
 
   final Random _rand;
 
-  set particleSystemPosition(Offset position) {
+  set particleSystemPosition(Offset? position) {
     _particleSystemPosition = position;
   }
 
@@ -147,9 +137,9 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   void _setScreenBorderPositions() {
-    _bottomBorder = _screenSize.height * 1.1;
-    _rightBorder = _screenSize.width * 1.1;
-    _leftBorder = _screenSize.width - _rightBorder;
+    _bottomBorder = _screenSize!.height * 1.1;
+    _rightBorder = _screenSize!.width * 1.1;
+    _leftBorder = _screenSize!.width - _rightBorder;
   }
 
   void _updateParticles() {
@@ -171,7 +161,7 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   bool _isOutsideOfBorder(Offset particleLocation) {
-    final globalParticlePosition = particleLocation + _particleSystemPosition;
+    final globalParticlePosition = particleLocation + _particleSystemPosition!;
     return (globalParticlePosition.dy >= _bottomBorder) ||
         (globalParticlePosition.dx >= _rightBorder) ||
         (globalParticlePosition.dx <= _leftBorder);
@@ -200,11 +190,11 @@ class ParticleSystem extends ChangeNotifier {
 
   Color _randomColor() {
     if (_colors != null) {
-      if (_colors.length == 1) {
-        return _colors[0];
+      if (_colors!.length == 1) {
+        return _colors![0];
       }
-      final index = _rand.nextInt(_colors.length);
-      return _colors[index];
+      final index = _rand.nextInt(_colors!.length);
+      return _colors![index];
     }
     return RandomColor().randomColor();
   }
@@ -232,7 +222,7 @@ class Particle {
         _aVelocityX = randomize(-0.1, 0.1),
         _aVelocityY = randomize(-0.1, 0.1),
         _aVelocityZ = randomize(-0.1, 0.1),
-        _gravity = lerpDouble(0.1, 5, gravity);
+        _gravity = lerpDouble(0.1, 5, gravity)!;
 
   final vmath.Vector2 _startUpForce;
 

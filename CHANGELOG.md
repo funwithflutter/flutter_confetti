@@ -1,3 +1,6 @@
+## [0.6.0]
+migrate to null safety
+
 ## [0.5.4+1]
 Fix: Call play on the confetti controller from `initState`.
 
