@@ -8,8 +8,8 @@ import 'enums/confetti_controller_state.dart';
 
 class ConfettiWidget extends StatefulWidget {
   const ConfettiWidget({
-    Key key,
-    @required this.confettiController,
+    Key? key,
+    required this.confettiController,
     this.emissionFrequency = 0.02,
     this.numberOfParticles = 10,
     this.maxBlastForce = 20,
@@ -26,15 +26,7 @@ class ConfettiWidget extends StatefulWidget {
     this.canvas,
     this.child,
     this.createParticlePath,
-  })  : assert(
-            confettiController != null,
-            emissionFrequency != null &&
-                numberOfParticles != null &&
-                maxBlastForce != null &&
-                minBlastForce != null &&
-                blastDirectionality != null &&
-                blastDirection != null),
-        assert(emissionFrequency >= 0 &&
+  })  : assert(emissionFrequency >= 0 &&
             emissionFrequency <= 1 &&
             numberOfParticles > 0 &&
             maxBlastForce > 0 &&
@@ -43,28 +35,37 @@ class ConfettiWidget extends StatefulWidget {
         assert(gravity >= 0 && gravity <= 1),
         super(key: key);
 
-  /// The [ConfettiController] must not be null.
+  /// Controls the animation.
   final ConfettiController confettiController;
 
-  /// The [maxBlastForce] and [minBlastForce] will determine the maximum and minimum blast force applied to
-  /// a particle within it's first 5 frames of life. The default [maxBlastForce] is set to `20`
+  /// The [maxBlastForce] and [minBlastForce] will determine the maximum and
+  /// minimum blast force applied to  a particle within it's first 5 frames of
+  /// life. The default [maxBlastForce] is set to `20`
   final double maxBlastForce;
 
-  /// The [maxBlastForce] and [minBlastForce] will determine the maximum and minimum blast force applied to
-  /// a particle within it's first 5 frames of life. The default [minBlastForce] is set to `5`
+  /// The [maxBlastForce] and [minBlastForce] will determine the maximum and
+  /// minimum blast force applied to a particle within it's first 5 frames of
+  /// life. The default [minBlastForce] is set to `5`
   final double minBlastForce;
 
-  /// The [blastDirectionality] is an enum that takes one of two values - directional or explosive.
+  /// The [blastDirectionality] is an enum that takes one of two
+  /// values - directional or explosive.
+  ///
   /// The default is set to directional
   final BlastDirectionality blastDirectionality;
 
-  /// The [blastDirection] is a radial value to determine the direction of the particle emission.
-  /// The default is set to `PI` (180 degrees). A value of `PI` will emit to the left of the canvas/screen.
+  /// The [blastDirection] is a radial value to determine the direction of the
+  /// particle emission.
+  ///
+  /// The default is set to `PI` (180 degrees).
+  /// A value of `PI` will emit to the left of the canvas/screen.
   final double blastDirection;
 
-  /// The [createParticlePath] is optional function that returns custom Path needed to generate particles
+  /// The [createParticlePath] is optional function that returns custom Path
+  /// needed to generate particles.
+  ///
   /// The default function returns rectangular path
-  final Path Function(Size size) createParticlePath;
+  final Path Function(Size size)? createParticlePath;
 
   /// The [gravity] is the speed at which the confetti will fall.
   /// The higher the [gravity] the faster it will fall.
@@ -73,42 +74,54 @@ class ConfettiWidget extends StatefulWidget {
   /// Default value is `0.1`
   final double gravity;
 
-  /// The [emissionFrequency] should be a value between 0 and 1. The higher the value the higher the
-  /// likelihood that particles will be emitted on a single frame. Default is set to `0.02` (2% chance)
+  /// The [emissionFrequency] should be a value between 0 and 1.
+  /// The higher the value the higher the likelihood that particles will be
+  /// emitted on a single frame.
+  ///
+  /// Default is set to `0.02` (2% chance).
   final double emissionFrequency;
 
-  /// The [numberOfParticles] to be emitted per emission. Default is set to `10`
+  /// The [numberOfParticles] to be emitted per emission.
+  ///
+  /// Default is set to `10`.
   final int numberOfParticles;
 
-  /// The [shouldLoop] attribute determines if the [emissionDuration] will reset which will result
-  /// in continues particles being emitted.
+  /// The [shouldLoop] attribute determines if the animation will
+  /// reset once it completes, resulting in a continuous particle emission.
   final bool shouldLoop;
 
-  /// The [displayTarget] attribute determines if a crosshair will be displayed to show the location
-  /// of the particle emitter
+  /// The [displayTarget] attribute determines if a crosshair will be displayed
+  /// to show the location of the particle emitter.
   final bool displayTarget;
 
   /// List of Colors to iterate over - if null then random values will be chosen
-  final List<Color> colors;
+  final List<Color>? colors;
 
-  /// An optional parameter to set the minimum size potential size for the confetti.
-  /// Must be smaller than the [maximumSize] attribute. Cannot be null
+  /// An optional parameter to set the minimum size potential size for
+  /// the confetti.
+  ///
+  /// Must be smaller than the [maximumSize] attribute.
   final Size minimumSize;
 
   /// An optional parameter to set the maximum potential size for the confetti.
-  /// Must be bigger than the [minimumSize] attribute. Cannot be null
+  /// Must be bigger than the [minimumSize] attribute.
   final Size maximumSize;
 
-  /// An optional parameter to specify drag force, effecting the movement of the confetti.
-  /// Using `1.0` will give no drag at all, while, for example, using `0.1` will give a lot of drag. Default is set to `0.05`.
+  /// An optional parameter to specify drag force, effecting the movement
+  /// of the confetti.
+  ///
+  /// Using `1.0` will give no drag at all, while, for example, using `0.1`
+  /// will give a lot of drag. Default is set to `0.05`.
   final double particleDrag;
 
-  /// An optional parameter to specify the area size where the confetti will be thrown.
-  /// By default this is set to screen size.
-  final Size canvas;
+  /// An optional parameter to specify the area size where the confetti will
+  /// be thrown.
+  ///
+  /// By default this is set to then screen size.
+  final Size? canvas;
 
   /// Child widget to display
-  final Widget child;
+  final Widget? child;
 
   @override
   _ConfettiWidgetState createState() => _ConfettiWidgetState();
@@ -118,12 +131,12 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     with SingleTickerProviderStateMixin {
   final GlobalKey _particleSystemKey = GlobalKey();
 
-  AnimationController _animController;
-  Animation<double> _animation;
-  ParticleSystem _particleSystem;
+  late AnimationController _animController;
+  late Animation<double> _animation;
+  late ParticleSystem _particleSystem;
 
   /// Keeps track of emition position on screen layout changes
-  Offset _emitterPosition;
+  Offset? _emitterPosition;
 
   /// Keeps track of the screen size on layout changes
   /// Controls the sizing restrictions for when confetti should be vissible
@@ -157,8 +170,9 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     _animController = AnimationController(
         vsync: this, duration: widget.confettiController.duration);
     _animation = Tween<double>(begin: 0, end: 1).animate(_animController);
-    _animation.addListener(_animationListener);
-    _animation.addStatusListener(_animationStatusListener);
+    _animation
+      ..addListener(_animationListener)
+      ..addStatusListener(_animationStatusListener);
 
     if (widget.confettiController.state == ConfettiControllerState.playing) {
       _startAnimation();
@@ -212,7 +226,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   void _startAnimation() {
     // Make sure widgets are built before setting screen size and position
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       _setScreenSize();
       _setEmitterPosition();
       _animController.forward(from: 0);
@@ -239,8 +253,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   Offset _getContainerPosition() {
-    final RenderBox containerRenderBox =
-        _particleSystemKey.currentContext.findRenderObject();
+    final containerRenderBox =
+        _particleSystemKey.currentContext!.findRenderObject() as RenderBox;
     return containerRenderBox.localToGlobal(Offset.zero);
   }
 
@@ -249,12 +263,13 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   /// On layout change update the position of the emitter
-  /// and the screen size
+  /// and the screen size.
   ///
-  /// Only update the emitter if it has already been set.
-  /// To avoid RenderObject issues.
-  /// The emitter position is first set in the [addPostFrameCallback]
-  /// in [initState]
+  /// Only update the emitter if it has already been set, to avoid RenderObject
+  /// issues.
+  ///
+  /// The emitter position is first set in the `addPostFrameCallback`
+  /// in [initState].
   void _updatePositionAndSize() {
     if (_getScreenSize() != _screenSize) {
       _setScreenSize();
@@ -286,17 +301,17 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     _animController.dispose();
     widget.confettiController.removeListener(_handleChange);
     _particleSystem.removeListener(_particleSystemListener);
-    _particleSystem = null;
     super.dispose();
   }
 }
 
 class ParticlePainter extends CustomPainter {
-  ParticlePainter(Listenable repaint,
-      {@required this.particles,
-      paintEmitterTarget = true,
-      emitterTargetColor = Colors.black})
-      : _paintEmitterTarget = paintEmitterTarget,
+  ParticlePainter(
+    Listenable? repaint, {
+    required this.particles,
+    bool paintEmitterTarget = true,
+    Color emitterTargetColor = Colors.black,
+  })  : _paintEmitterTarget = paintEmitterTarget,
         _emitterPaint = Paint()
           ..color = emitterTargetColor
           ..style = PaintingStyle.stroke
@@ -317,9 +332,6 @@ class ParticlePainter extends CustomPainter {
     if (_paintEmitterTarget) {
       _paintEmitter(canvas);
     }
-    if (particles == null) {
-      return;
-    }
     _paintParticles(canvas);
   }
 
@@ -327,18 +339,17 @@ class ParticlePainter extends CustomPainter {
   void _paintEmitter(Canvas canvas) {
     const radius = 10.0;
     canvas.drawCircle(Offset.zero, radius, _emitterPaint);
-    final path = Path();
-    path.moveTo(0, -radius);
-    path.lineTo(0, radius);
-    path.moveTo(-radius, 0);
-    path.lineTo(radius, 0);
+    final path = Path()
+      ..moveTo(0, -radius)
+      ..lineTo(0, radius)
+      ..moveTo(-radius, 0)
+      ..lineTo(radius, 0);
     canvas.drawPath(path, _emitterPaint);
   }
 
   void _paintParticles(Canvas canvas) {
     for (final particle in particles) {
-      final rotationMatrix4 = Matrix4.identity();
-      rotationMatrix4
+      final rotationMatrix4 = Matrix4.identity()
         ..translate(particle.location.dx, particle.location.dy)
         ..rotateX(particle.angleX)
         ..rotateY(particle.angleY)
@@ -357,9 +368,7 @@ class ParticlePainter extends CustomPainter {
 
 class ConfettiController extends ChangeNotifier {
   ConfettiController({this.duration = const Duration(seconds: 30)})
-      : assert(duration != null &&
-            !duration.isNegative &&
-            duration.inMicroseconds > 0);
+      : assert(!duration.isNegative && duration.inMicroseconds > 0);
 
   Duration duration;
 
