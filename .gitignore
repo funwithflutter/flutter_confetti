@@ -4,6 +4,7 @@ ios/
 windows/
 mac/
 linux/
+web/
 
 # Miscellaneous
 *.class
