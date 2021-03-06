@@ -16,31 +16,20 @@ enum ParticleSystemStatus {
 }
 
 class ParticleSystem extends ChangeNotifier {
-  ParticleSystem(
-      {@required double emissionFrequency,
-      @required int numberOfParticles,
-      @required double maxBlastForce,
-      @required double minBlastForce,
-      @required double blastDirection,
-      @required BlastDirectionality blastDirectionality,
-      @required List<Color> colors,
-      @required Size minimumSize,
-      @required Size maximumSize,
-      @required double particleDrag,
-      @required double gravity,
-      Path Function(Size size) createParticlePath})
-      : assert(
-          emissionFrequency != null &&
-              numberOfParticles != null &&
-              maxBlastForce != null &&
-              minBlastForce != null &&
-              blastDirection != null &&
-              minimumSize != null &&
-              maximumSize != null &&
-              particleDrag != null &&
-              blastDirectionality != null,
-        ),
-        assert(maxBlastForce > 0 &&
+  ParticleSystem({
+    required double emissionFrequency,
+    required int numberOfParticles,
+    required double maxBlastForce,
+    required double minBlastForce,
+    required double blastDirection,
+    required BlastDirectionality blastDirectionality,
+    required List<Color>? colors,
+    required Size minimumSize,
+    required Size maximumSize,
+    required double particleDrag,
+    required double gravity,
+    Path Function(Size size)? createParticlePath,
+  })  : assert(maxBlastForce > 0 &&
             minBlastForce > 0 &&
             emissionFrequency >= 0 &&
             emissionFrequency <= 1 &&
@@ -69,7 +58,7 @@ class ParticleSystem extends ChangeNotifier {
         _rand = Random(),
         _createParticlePath = createParticlePath;
 
-  ParticleSystemStatus _particleSystemStatus;
+  ParticleSystemStatus? _particleSystemStatus;
 
   final List<Particle> _particles = [];
 
@@ -82,22 +71,22 @@ class ParticleSystem extends ChangeNotifier {
   final double _blastDirection;
   final BlastDirectionality _blastDirectionality;
   final double _gravity;
-  final List<Color> _colors;
+  final List<Color>? _colors;
   final Size _minimumSize;
   final Size _maximumSize;
   final double _particleDrag;
-  final Path Function(Size size) _createParticlePath;
+  final Path Function(Size size)? _createParticlePath;
 
-  Offset _particleSystemPosition;
-  Size _screenSize;
+  Offset? _particleSystemPosition;
+  Size? _screenSize;
 
-  double _bottomBorder;
-  double _rightBorder;
-  double _leftBorder;
+  late double _bottomBorder;
+  late double _rightBorder;
+  late double _leftBorder;
 
   final Random _rand;
 
-  set particleSystemPosition(Offset position) {
+  set particleSystemPosition(Offset? position) {
     _particleSystemPosition = position;
   }
 
@@ -119,7 +108,7 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   List<Particle> get particles => _particles;
-  ParticleSystemStatus get particleSystemStatus => _particleSystemStatus;
+  ParticleSystemStatus? get particleSystemStatus => _particleSystemStatus;
 
   void update() {
     _clean();
@@ -150,31 +139,26 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   void _setScreenBorderPositions() {
-    _bottomBorder = _screenSize.height * 1.1;
-    _rightBorder = _screenSize.width * 1.1;
-    _leftBorder = _screenSize.width - _rightBorder;
+    _bottomBorder = _screenSize!.height * 1.1;
+    _rightBorder = _screenSize!.width * 1.1;
+    _leftBorder = _screenSize!.width - _rightBorder;
   }
 
   void _updateParticles() {
-    if (particles == null) {
-      return;
-    }
     for (final particle in _particles) {
       particle.update();
     }
   }
 
   void _clean() {
-    if (_particleSystemPosition != null &&
-        _screenSize != null &&
-        particles != null) {
+    if (_particleSystemPosition != null && _screenSize != null) {
       _particles
           .removeWhere((particle) => _isOutsideOfBorder(particle.location));
     }
   }
 
   bool _isOutsideOfBorder(Offset particleLocation) {
-    final globalParticlePosition = particleLocation + _particleSystemPosition;
+    final globalParticlePosition = particleLocation + _particleSystemPosition!;
     return (globalParticlePosition.dy >= _bottomBorder) ||
         (globalParticlePosition.dx >= _rightBorder) ||
         (globalParticlePosition.dx <= _leftBorder);
@@ -203,11 +187,11 @@ class ParticleSystem extends ChangeNotifier {
 
   Color _randomColor() {
     if (_colors != null) {
-      if (_colors.length == 1) {
-        return _colors[0];
+      if (_colors!.length == 1) {
+        return _colors![0];
       }
-      final index = _rand.nextInt(_colors.length);
-      return _colors[index];
+      final index = _rand.nextInt(_colors!.length);
+      return _colors![index];
     }
     return RandomColor().randomColor();
   }
@@ -222,7 +206,7 @@ class ParticleSystem extends ChangeNotifier {
 
 class Particle {
   Particle(vmath.Vector2 startUpForce, Color color, Size size, double gravity,
-      double particleDrag, Path Function(Size size) createParticlePath)
+      double particleDrag, Path Function(Size size)? createParticlePath)
       : _startUpForce = startUpForce,
         _color = color,
         _mass = randomize(1, 11),
@@ -252,7 +236,7 @@ class Particle {
   double _aVelocityY;
   double _aZ = 0;
   double _aVelocityZ;
-  final double _gravity;
+  final double? _gravity;
   final _aAcceleration = 0.0001;
 
   final Color _color;
@@ -262,28 +246,27 @@ class Particle {
   double _timeAlive = 0;
 
   static Path createPath(Size size) {
-    final pathShape = Path();
-    pathShape.moveTo(0, 0);
-    pathShape.lineTo(-size.width, 0);
-    pathShape.lineTo(-size.width, size.height);
-    pathShape.lineTo(0, size.height);
-    pathShape.close();
+    final pathShape = Path()
+      ..moveTo(0, 0)
+      ..lineTo(-size.width, 0)
+      ..lineTo(-size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
     return pathShape;
   }
 
   void applyForce(vmath.Vector2 force) {
-    final f = force.clone();
-    f.divide(vmath.Vector2.all(_mass));
+    final f = force.clone()..divide(vmath.Vector2.all(_mass));
     _acceleration.add(f);
   }
 
   void drag() {
     final speed = sqrt(pow(_velocity.x, 2) + pow(_velocity.y, 2));
     final dragMagnitude = _particleDrag * speed * speed;
-    final drag = _velocity.clone();
-    drag.multiply(vmath.Vector2.all(-1));
-    drag.normalize();
-    drag.multiply(vmath.Vector2.all(dragMagnitude));
+    final drag = _velocity.clone()
+      ..multiply(vmath.Vector2.all(-1))
+      ..normalize()
+      ..multiply(vmath.Vector2.all(dragMagnitude));
     applyForce(drag);
   }
 
@@ -307,7 +290,7 @@ class Particle {
 
     _timeAlive += 1;
 
-    applyForce(vmath.Vector2(0, _gravity));
+    applyForce(vmath.Vector2(0, _gravity!));
 
     _velocity.add(_acceleration);
     _location.add(_velocity);
