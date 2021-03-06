@@ -1,3 +1,6 @@
+## [0.6.0]
+Now with null safety :) - Thanks Ali1Ammar!
+
 ## [0.5.5]
 Add optional `createParticlePath` function to pass in a custom `Path` for the conveti (for example a Star path, instead of the default Rectangle path). Example updated. Thanks Artur-Wisniewski.
 Fix: Animation stop event not firing. Thanks WieFel.
