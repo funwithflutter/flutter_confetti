@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const ConfettiSample());
 
 class ConfettiSample extends StatelessWidget {
-  const ConfettiSample({Key key}) : super(key: key);
+  const ConfettiSample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +25,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  ConfettiController _controllerCenter;
-  ConfettiController _controllerCenterRight;
-  ConfettiController _controllerCenterLeft;
-  ConfettiController _controllerTopCenter;
-  ConfettiController _controllerBottomCenter;
+  late ConfettiController _controllerCenter;
+  late ConfettiController _controllerCenterRight;
+  late ConfettiController _controllerCenterLeft;
+  late ConfettiController _controllerTopCenter;
+  late ConfettiController _controllerBottomCenter;
 
   @override
   void initState() {
@@ -106,7 +106,7 @@ class _MyAppState extends State<MyApp> {
         ),
         Align(
           alignment: Alignment.center,
-          child: FlatButton(
+          child: TextButton(
               onPressed: () {
                 _controllerCenter.play();
               },
@@ -133,7 +133,7 @@ class _MyAppState extends State<MyApp> {
         ),
         Align(
           alignment: Alignment.centerRight,
-          child: FlatButton(
+          child: TextButton(
               onPressed: () {
                 _controllerCenterRight.play();
               },
@@ -157,7 +157,7 @@ class _MyAppState extends State<MyApp> {
         ),
         Align(
           alignment: Alignment.centerLeft,
-          child: FlatButton(
+          child: TextButton(
               onPressed: () {
                 _controllerCenterLeft.play();
               },
@@ -179,7 +179,7 @@ class _MyAppState extends State<MyApp> {
         ),
         Align(
           alignment: Alignment.topCenter,
-          child: FlatButton(
+          child: TextButton(
               onPressed: () {
                 _controllerTopCenter.play();
               },
@@ -200,7 +200,7 @@ class _MyAppState extends State<MyApp> {
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: FlatButton(
+          child: TextButton(
               onPressed: () {
                 _controllerBottomCenter.play();
               },

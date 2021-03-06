@@ -1,16 +1,21 @@
-Blast some confetti all over the screen and celebrate user achievements!  
+Blast some confetti all over the screen and celebrate user achievements!
+
+<img src="https://raw.githubusercontent.com/funwithflutter/flutter_confetti/null-safety/display/Confetti%20Screenshot.png" align = "center" height="400">
 
 ## Demo
-[WEB Demo](https://funwithflutter.github.io/confetti/#/)
 
-A video walkthrough is available [here](https://www.youtube.com/watch?v=jvhw3cfj2rk).
+Video showing the Confetti in Action: https://youtu.be/dGMVyUY4-6M
+
+Live [WEB Demo](https://funwithflutter.github.io/confetti/#/)
+
+An __old__ video walkthrough is available [here](https://www.youtube.com/watch?v=jvhw3cfj2rk).
 
 
 ## Getting Started  
   
 To use this plugin, add `confetti` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/). 
   
-See the example to get started quickly. To generate the platform folderse run:
+See the example to get started quickly. To generate the platform folders run:
 
 ```dart
 flutter create .
