@@ -2,9 +2,12 @@
 android/
 ios/
 windows/
-mac/
+macos/
 linux/
 web/
+
+flutter_sdk
+.vscode
 
 # Miscellaneous
 *.class

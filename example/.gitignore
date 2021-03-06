@@ -2,9 +2,11 @@
 android/
 ios/
 windows/
-mac/
+macos/
 linux/
 web/
+
+fvm_config.json
 
 # Miscellaneous
 *.class
