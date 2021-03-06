@@ -1,3 +1,7 @@
+# Custom
+android/
+ios/
+
 # Miscellaneous
 *.class
 *.log
