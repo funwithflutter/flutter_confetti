@@ -1,6 +1,9 @@
 # Custom
 android/
 ios/
+windows/
+mac/
+linux/
 
 # Miscellaneous
 *.class
