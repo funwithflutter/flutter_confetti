@@ -1,4 +1,4 @@
-## [0.6.0]
+## [0.6.0-nullsafety]
 Now with null safety :) - Thanks Ali1Ammar!
 
 ## [0.5.5]
