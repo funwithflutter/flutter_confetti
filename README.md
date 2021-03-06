@@ -3,14 +3,14 @@ Blast some confetti all over the screen and celebrate user achievements!
 ## Demo
 [WEB Demo](https://funwithflutter.github.io/confetti/#/)
 
-A video walkthrough is available [here](https://www.youtube.com/watch?v=jvhw3cfj2rk).
+An __old__ video walkthrough is available [here](https://www.youtube.com/watch?v=jvhw3cfj2rk).
 
 
 ## Getting Started  
   
 To use this plugin, add `confetti` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/). 
   
-See the example to get started quickly. To generate the platform folderse run:
+See the example to get started quickly. To generate the platform folders run:
 
 ```dart
 flutter create .
