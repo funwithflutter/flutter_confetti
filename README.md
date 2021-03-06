@@ -10,7 +10,13 @@ A video walkthrough is available [here](https://www.youtube.com/watch?v=jvhw3cfj
   
 To use this plugin, add `confetti` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/). 
   
-See the example to get started quickly.
+See the example to get started quickly. To generate the platform folderse run:
+
+```dart
+flutter create .
+```
+
+in the example folder.
 
 To begin you need to instantiate a `ConfettiController` variable and pass in a `Duration` argument. The `ConfettiController` can be instantiated in the `initState` method and disposed in the `dispose` method.
 
@@ -31,6 +37,36 @@ Other attributes that can be set are:
 * `gravity` -> change the speed at which the confetti falls. A value between 0 and 1. The higher the value the faster it will fall. Default is set to `0.1`
 * `particleDrag` -> configure the drag force to apply to the confetti. A value between 0 and 1. A value of 1 will be no drag at all, while 0.1, for example, will be a lot of drag. Default is set to `0.05`
 * `canvas` -> set the size of the area where the confetti will be shown, by default this is set to full screen size.
+* `createParticlePath` -> An optional function that retuns a custom `Path` to generate unique particles. Default returns a rectangular path.
+
+
+### Example of a custom `createParticlePath`
+
+```dart
+Path drawStar(Size size) {
+    // Method to convert degree to radians
+    double degToRad(double deg) => deg * (pi / 180.0);
+
+    const numberOfPoints = 5;
+    final halfWidth = size.width / 2;
+    final externalRadius = halfWidth;
+    final internalRadius = halfWidth / 2.5;
+    final degreesPerStep = degToRad(360 / numberOfPoints);
+    final halfDegreesPerStep = degreesPerStep / 2;
+    final path = Path();
+    final fullAngle = degToRad(360);
+    path.moveTo(size.width, halfWidth);
+
+    for (double step = 0; step < fullAngle; step += degreesPerStep) {
+      path.lineTo(halfWidth + externalRadius * cos(step),
+          halfWidth + externalRadius * sin(step));
+      path.lineTo(halfWidth + internalRadius * cos(step + halfDegreesPerStep),
+          halfWidth + internalRadius * sin(step + halfDegreesPerStep));
+    }
+    path.close();
+    return path;
+  }
+```
 
 Enjoy the confetti.
 

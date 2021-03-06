@@ -1,3 +1,7 @@
+## [0.5.5]
+Add optional `createParticlePath` function to pass in a custom `Path` for the conveti (for example a Star path, instead of the default Rectangle path). Example updated. Thanks Artur-Wisniewski.
+Fix: Animation stop event not firing. Thanks WieFel.
+
 ## [0.5.4+1]
 Fix: Call play on the confetti controller from `initState`.
 
