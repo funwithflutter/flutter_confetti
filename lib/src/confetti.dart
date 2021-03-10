@@ -297,7 +297,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   @override
   void dispose() {
-    widget.confettiController.stop();
+    widget.confettiController.stop(notify: false);
     _animController.dispose();
     widget.confettiController.removeListener(_handleChange);
     _particleSystem.removeListener(_particleSystemListener);
@@ -381,8 +381,10 @@ class ConfettiController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void stop() {
+  void stop({bool notify = true}) {
     _state = ConfettiControllerState.stopped;
-    notifyListeners();
+    if (notify) {
+      notifyListeners();
+    }
   }
 }
