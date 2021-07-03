@@ -1,7 +1,8 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:confetti/src/particle.dart';
+import 'package:confetti/src/svg.dart';
+import 'package:flutter/material.dart';
 
 import 'enums/blast_directionality.dart';
 import 'enums/confetti_controller_state.dart';
@@ -26,6 +27,7 @@ class ConfettiWidget extends StatefulWidget {
     this.canvas,
     this.child,
     this.createParticlePath,
+    this.svgDrawables,
   })  : assert(emissionFrequency >= 0 &&
             emissionFrequency <= 1 &&
             numberOfParticles > 0 &&
@@ -33,6 +35,8 @@ class ConfettiWidget extends StatefulWidget {
             minBlastForce > 0 &&
             maxBlastForce > minBlastForce),
         assert(gravity >= 0 && gravity <= 1),
+        assert(svgDrawables == null || createParticlePath == null,
+            'do not use both createParticlePath and svgAssets'),
         super(key: key);
 
   /// Controls the animation.
@@ -66,6 +70,12 @@ class ConfettiWidget extends StatefulWidget {
   ///
   /// The default function returns rectangular path
   final Path Function(Size size)? createParticlePath;
+
+  /// The [svgDrawables] is optional list of svg assets
+  /// needed to generate custom particles.
+  ///
+  /// They replaces canvas path
+  final Iterable<SvgDrawable>? svgDrawables;
 
   /// The [gravity] is the speed at which the confetti will fall.
   /// The higher the [gravity] the faster it will fall.
@@ -147,18 +157,20 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     widget.confettiController.addListener(_handleChange);
 
     _particleSystem = ParticleSystem(
-        emissionFrequency: widget.emissionFrequency,
-        numberOfParticles: widget.numberOfParticles,
-        maxBlastForce: widget.maxBlastForce,
-        minBlastForce: widget.minBlastForce,
-        gravity: widget.gravity,
-        blastDirection: widget.blastDirection,
-        blastDirectionality: widget.blastDirectionality,
-        colors: widget.colors,
-        minimumSize: widget.minimumSize,
-        maximumSize: widget.maximumSize,
-        particleDrag: widget.particleDrag,
-        createParticlePath: widget.createParticlePath);
+      emissionFrequency: widget.emissionFrequency,
+      numberOfParticles: widget.numberOfParticles,
+      maxBlastForce: widget.maxBlastForce,
+      minBlastForce: widget.minBlastForce,
+      gravity: widget.gravity,
+      blastDirection: widget.blastDirection,
+      blastDirectionality: widget.blastDirectionality,
+      colors: widget.colors,
+      minimumSize: widget.minimumSize,
+      maximumSize: widget.maximumSize,
+      particleDrag: widget.particleDrag,
+      createParticlePath: widget.createParticlePath,
+      svgDrawables: widget.svgDrawables?.toList(growable: false),
+    );
 
     _particleSystem.addListener(_particleSystemListener);
 
@@ -316,16 +328,12 @@ class ParticlePainter extends CustomPainter {
           ..color = emitterTargetColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0,
-        _particlePaint = Paint()
-          ..color = Colors.green
-          ..style = PaintingStyle.fill,
         super(repaint: repaint);
 
   final List<Particle> particles;
 
   final Paint _emitterPaint;
   final bool _paintEmitterTarget;
-  final Paint _particlePaint;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -349,14 +357,7 @@ class ParticlePainter extends CustomPainter {
 
   void _paintParticles(Canvas canvas) {
     for (final particle in particles) {
-      final rotationMatrix4 = Matrix4.identity()
-        ..translate(particle.location.dx, particle.location.dy)
-        ..rotateX(particle.angleX)
-        ..rotateY(particle.angleY)
-        ..rotateZ(particle.angleZ);
-
-      final finalPath = particle.path.transform(rotationMatrix4.storage);
-      canvas.drawPath(finalPath, _particlePaint..color = particle.color);
+      particle.draw(canvas);
     }
   }
 

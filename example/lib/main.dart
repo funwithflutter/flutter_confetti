@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 void main() => runApp(const ConfettiSample());
 
@@ -30,6 +33,8 @@ class _MyAppState extends State<MyApp> {
   late ConfettiController _controllerCenterLeft;
   late ConfettiController _controllerTopCenter;
   late ConfettiController _controllerBottomCenter;
+  final List<SvgDrawable> _drawableSvgs = [];
+  final Completer _svgLoading = Completer();
 
   @override
   void initState() {
@@ -43,6 +48,15 @@ class _MyAppState extends State<MyApp> {
         ConfettiController(duration: const Duration(seconds: 10));
     _controllerBottomCenter =
         ConfettiController(duration: const Duration(seconds: 10));
+
+    Future.microtask(() async {
+      final rawSvg = await rootBundle.loadString('assets/spot.svg');
+      _drawableSvgs
+          .add(SvgDrawable(await svg.fromSvgString(rawSvg, rawSvg), width: 10));
+
+      _svgLoading.complete();
+    });
+
     super.initState();
   }
 
@@ -90,17 +104,18 @@ class _MyAppState extends State<MyApp> {
           alignment: Alignment.center,
           child: ConfettiWidget(
             confettiController: _controllerCenter,
-            blastDirectionality: BlastDirectionality
-                .explosive, // don't specify a direction, blast randomly
-            shouldLoop:
-                true, // start again as soon as the animation is finished
+            blastDirectionality: BlastDirectionality.explosive,
+            // don't specify a direction, blast randomly
+            shouldLoop: true,
+            // start again as soon as the animation is finished
             colors: const [
               Colors.green,
               Colors.blue,
               Colors.pink,
               Colors.orange,
               Colors.purple
-            ], // manually specify the colors to be used
+            ],
+            // manually specify the colors to be used
             createParticlePath: drawStar, // define a custom shape/path.
           ),
         ),
@@ -115,22 +130,29 @@ class _MyAppState extends State<MyApp> {
 
         //CENTER RIGHT -- Emit left
         Align(
-          alignment: Alignment.centerRight,
-          child: ConfettiWidget(
-            confettiController: _controllerCenterRight,
-            blastDirection: pi, // radial value - LEFT
-            particleDrag: 0.05, // apply drag to the confetti
-            emissionFrequency: 0.05, // how often it should emit
-            numberOfParticles: 20, // number of particles to emit
-            gravity: 0.05, // gravity - or fall speed
-            shouldLoop: false,
-            colors: const [
-              Colors.green,
-              Colors.blue,
-              Colors.pink
-            ], // manually specify the colors to be used
-          ),
-        ),
+            alignment: Alignment.centerRight,
+            child: FutureBuilder(
+              future: _svgLoading.future,
+              builder: (context, snapshot) {
+                return snapshot.connectionState != ConnectionState.done
+                    ? Text('loading...')
+                    : ConfettiWidget(
+                        confettiController: _controllerCenterRight,
+                        blastDirection: pi,
+                        // radial value - LEFT
+                        particleDrag: 0.05,
+                        // apply drag to the confetti
+                        emissionFrequency: 0.05,
+                        // how often it should emit
+                        numberOfParticles: 20,
+                        // number of particles to emit
+                        gravity: 0.05,
+                        // gravity - or fall speed
+                        shouldLoop: false,
+                        svgDrawables: _drawableSvgs,
+                      );
+              },
+            )),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
@@ -145,12 +167,13 @@ class _MyAppState extends State<MyApp> {
           alignment: Alignment.centerLeft,
           child: ConfettiWidget(
             confettiController: _controllerCenterLeft,
-            blastDirection: 0, // radial value - RIGHT
+            blastDirection: 0,
+            // radial value - RIGHT
             emissionFrequency: 0.6,
-            minimumSize: const Size(10,
-                10), // set the minimum potential size for the confetti (width, height)
-            maximumSize: const Size(50,
-                50), // set the maximum potential size for the confetti (width, height)
+            minimumSize: const Size(10, 10),
+            // set the minimum potential size for the confetti (width, height)
+            maximumSize: const Size(50, 50),
+            // set the maximum potential size for the confetti (width, height)
             numberOfParticles: 1,
             gravity: 0.1,
           ),
@@ -170,10 +193,13 @@ class _MyAppState extends State<MyApp> {
           child: ConfettiWidget(
             confettiController: _controllerTopCenter,
             blastDirection: pi / 2,
-            maxBlastForce: 5, // set a lower max blast force
-            minBlastForce: 2, // set a lower min blast force
+            maxBlastForce: 5,
+            // set a lower max blast force
+            minBlastForce: 2,
+            // set a lower min blast force
             emissionFrequency: 0.05,
-            numberOfParticles: 50, // a lot of particles at once
+            numberOfParticles: 50,
+            // a lot of particles at once
             gravity: 1,
           ),
         ),
