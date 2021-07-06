@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:confetti/src/drawable.dart';
+import 'package:confetti/src/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:random_color/random_color.dart';
 import 'package:vector_math/vector_math.dart' as vmath;
-
-import 'package:confetti/src/helper.dart';
 
 import 'enums/blast_directionality.dart';
 
@@ -29,6 +29,7 @@ class ParticleSystem extends ChangeNotifier {
     required double particleDrag,
     required double gravity,
     Path Function(Size size)? createParticlePath,
+    List<Drawable>? drawables,
   })  : assert(maxBlastForce > 0 &&
             minBlastForce > 0 &&
             emissionFrequency >= 0 &&
@@ -56,7 +57,8 @@ class ParticleSystem extends ChangeNotifier {
         _maximumSize = maximumSize,
         _particleDrag = particleDrag,
         _rand = Random(),
-        _createParticlePath = createParticlePath;
+        _createParticlePath = createParticlePath,
+        _drawables = drawables;
 
   ParticleSystemStatus? _particleSystemStatus;
 
@@ -76,6 +78,7 @@ class ParticleSystem extends ChangeNotifier {
   final Size _maximumSize;
   final double _particleDrag;
   final Path Function(Size size)? _createParticlePath;
+  final List<Drawable>? _drawables;
 
   Offset? _particleSystemPosition;
   Size? _screenSize;
@@ -108,6 +111,7 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   List<Particle> get particles => _particles;
+
   ParticleSystemStatus? get particleSystemStatus => _particleSystemStatus;
 
   void update() {
@@ -165,10 +169,19 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   List<Particle> _generateParticles({int number = 1}) {
+    final max = _drawables?.length ?? 1;
     return List<Particle>.generate(
         number,
-        (i) => Particle(_generateParticleForce(), _randomColor(), _randomSize(),
-            _gravity, _particleDrag, _createParticlePath));
+        (i) => Particle(
+            _generateParticleForce(),
+            _gravity,
+            _particleDrag,
+            _drawables == null
+                ? _createParticlePath != null
+                    ? PathDrawable(
+                        _createParticlePath!, _randomSize(), _randomColor())
+                    : SquareDrawable(_randomSize(), _randomColor())
+                : _drawables![max > 1 ? Random().nextInt(max - 1) : 0]));
   }
 
   double get _randomBlastDirection =>
@@ -205,19 +218,16 @@ class ParticleSystem extends ChangeNotifier {
 }
 
 class Particle {
-  Particle(vmath.Vector2 startUpForce, Color color, Size size, double gravity,
-      double particleDrag, Path Function(Size size)? createParticlePath)
+  Particle(vmath.Vector2 startUpForce, double gravity, double particleDrag,
+      Drawable drawable)
       : _startUpForce = startUpForce,
-        _color = color,
         _mass = randomize(1, 11),
         _particleDrag = particleDrag,
         _location = vmath.Vector2.zero(),
         _acceleration = vmath.Vector2.zero(),
         _velocity = vmath.Vector2(randomize(-3, 3), randomize(-3, 3)),
         // _size = size,
-        _pathShape = createParticlePath != null
-            ? createParticlePath(size)
-            : createPath(size),
+        _drawable = drawable,
         _aVelocityX = randomize(-0.1, 0.1),
         _aVelocityY = randomize(-0.1, 0.1),
         _aVelocityZ = randomize(-0.1, 0.1),
@@ -239,21 +249,10 @@ class Particle {
   final double? _gravity;
   final _aAcceleration = 0.0001;
 
-  final Color _color;
   final double _mass;
-  final Path _pathShape;
+  final Drawable _drawable;
 
   double _timeAlive = 0;
-
-  static Path createPath(Size size) {
-    final pathShape = Path()
-      ..moveTo(0, 0)
-      ..lineTo(-size.width, 0)
-      ..lineTo(-size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    return pathShape;
-  }
 
   void applyForce(vmath.Vector2 force) {
     final f = force.clone()..divide(vmath.Vector2.all(_mass));
@@ -304,17 +303,17 @@ class Particle {
     _aZ += _aVelocityZ;
   }
 
-  Offset get location {
-    if (_location.x.isNaN || _location.y.isNaN) {
-      return const Offset(0, 0);
-    }
-    return Offset(_location.x, _location.y);
+  void draw(Canvas canvas) {
+    final rotationMatrix4 = Matrix4.identity()
+      ..translate(location.dx, location.dy)
+      ..rotateX(_aX)
+      ..rotateY(_aY)
+      ..rotateZ(_aZ);
+
+    _drawable.draw(canvas, transform: rotationMatrix4.storage);
   }
 
-  Color get color => _color;
-  Path get path => _pathShape;
-
-  double get angleX => _aX;
-  double get angleY => _aY;
-  double get angleZ => _aZ;
+  Offset get location => _location.x.isNaN || _location.y.isNaN
+      ? const Offset(0, 0)
+      : Offset(_location.x, _location.y);
 }
