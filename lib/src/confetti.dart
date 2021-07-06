@@ -1,7 +1,7 @@
 import 'dart:math';
 
+import 'package:confetti/src/drawable.dart';
 import 'package:confetti/src/particle.dart';
-import 'package:confetti/src/svg.dart';
 import 'package:flutter/material.dart';
 
 import 'enums/blast_directionality.dart';
@@ -27,7 +27,7 @@ class ConfettiWidget extends StatefulWidget {
     this.canvas,
     this.child,
     this.createParticlePath,
-    this.svgDrawables,
+    this.drawables,
   })  : assert(emissionFrequency >= 0 &&
             emissionFrequency <= 1 &&
             numberOfParticles > 0 &&
@@ -35,7 +35,7 @@ class ConfettiWidget extends StatefulWidget {
             minBlastForce > 0 &&
             maxBlastForce > minBlastForce),
         assert(gravity >= 0 && gravity <= 1),
-        assert(svgDrawables == null || createParticlePath == null,
+        assert(drawables == null || createParticlePath == null,
             'do not use both createParticlePath and svgAssets'),
         super(key: key);
 
@@ -71,11 +71,11 @@ class ConfettiWidget extends StatefulWidget {
   /// The default function returns rectangular path
   final Path Function(Size size)? createParticlePath;
 
-  /// The [svgDrawables] is optional list of svg assets
+  /// The [drawables] is optional list of drawables
   /// needed to generate custom particles.
   ///
   /// They replaces canvas path
-  final Iterable<SvgDrawable>? svgDrawables;
+  final Iterable<Drawable>? drawables;
 
   /// The [gravity] is the speed at which the confetti will fall.
   /// The higher the [gravity] the faster it will fall.
@@ -169,7 +169,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
       maximumSize: widget.maximumSize,
       particleDrag: widget.particleDrag,
       createParticlePath: widget.createParticlePath,
-      svgDrawables: widget.svgDrawables?.toList(growable: false),
+      drawables: widget.drawables?.toList(growable: false),
     );
 
     _particleSystem.addListener(_particleSystemListener);

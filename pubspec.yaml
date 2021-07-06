@@ -11,7 +11,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_svg: ^0.22.0
   random_color: ^1.0.6-nullsafety
   vector_math: ^2.1.0
 

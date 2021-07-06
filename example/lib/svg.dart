@@ -1,9 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:confetti/confetti.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/flutter_svg.dart' hide Drawable;
 
-class SvgDrawable {
+class SvgDrawable implements Drawable {
   SvgDrawable(
     this.drawableRoot, {
     this.width,
@@ -20,6 +21,7 @@ class SvgDrawable {
   /// will take the height of its parent.
   final double? height;
 
+  @override
   void draw(Canvas canvas, {Float64List? transform}) {
     if (transform != null) {
       canvas

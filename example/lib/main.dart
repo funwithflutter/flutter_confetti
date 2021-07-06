@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
+import 'package:example/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -149,7 +150,7 @@ class _MyAppState extends State<MyApp> {
                         gravity: 0.05,
                         // gravity - or fall speed
                         shouldLoop: false,
-                        svgDrawables: _drawableSvgs,
+                        drawables: _drawableSvgs,
                       );
               },
             )),
