@@ -33,6 +33,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    super.initState();
     _controllerCenter =
         ConfettiController(duration: const Duration(seconds: 10));
     _controllerCenterRight =
@@ -43,7 +44,6 @@ class _MyAppState extends State<MyApp> {
         ConfettiController(duration: const Duration(seconds: 10));
     _controllerBottomCenter =
         ConfettiController(duration: const Duration(seconds: 10));
-    super.initState();
   }
 
   @override

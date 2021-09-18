@@ -144,6 +144,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   @override
   void initState() {
+    super.initState();
     widget.confettiController.addListener(_handleChange);
 
     _particleSystem = ParticleSystem(
@@ -163,7 +164,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     _particleSystem.addListener(_particleSystemListener);
 
     _initAnimation();
-    super.initState();
   }
 
   void _initAnimation() {
