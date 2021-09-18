@@ -10,6 +10,7 @@ else
   # Get flutter
   git clone https://github.com/flutter/flutter.git
   FLUTTER=flutter/bin/flutter
+  export PATH="$PATH":"$FLUTTER"
 fi
 
 # Setup FVM
