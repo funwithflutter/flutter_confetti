@@ -95,13 +95,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.0"
-  random_color:
-    dependency: "direct main"
-    description:
-      name: random_color
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.6-nullsafety"
   sky_engine:
     dependency: transitive
     description: flutter

@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:random_color/random_color.dart';
 import 'package:vector_math/vector_math.dart' as vmath;
 
 import 'package:confetti/src/helper.dart';
@@ -179,7 +178,7 @@ class ParticleSystem extends ChangeNotifier {
     if (_blastDirectionality == BlastDirectionality.explosive) {
       blastDirection = _randomBlastDirection;
     }
-    final blastRadius = randomize(_minBlastForce, _maxBlastForce);
+    final blastRadius = Helper.randomize(_minBlastForce, _maxBlastForce);
     final y = blastRadius * sin(blastDirection);
     final x = blastRadius * cos(blastDirection);
     return vmath.Vector2(x, y);
@@ -193,13 +192,13 @@ class ParticleSystem extends ChangeNotifier {
       final index = _rand.nextInt(_colors!.length);
       return _colors![index];
     }
-    return RandomColor().randomColor();
+    return Helper.randomColor();
   }
 
   Size _randomSize() {
     return Size(
-      randomize(_minimumSize.width, _maximumSize.width),
-      randomize(_minimumSize.height, _maximumSize.height),
+      Helper.randomize(_minimumSize.width, _maximumSize.width),
+      Helper.randomize(_minimumSize.height, _maximumSize.height),
     );
   }
 }
@@ -209,18 +208,19 @@ class Particle {
       double particleDrag, Path Function(Size size)? createParticlePath)
       : _startUpForce = startUpForce,
         _color = color,
-        _mass = randomize(1, 11),
+        _mass = Helper.randomize(1, 11),
         _particleDrag = particleDrag,
         _location = vmath.Vector2.zero(),
         _acceleration = vmath.Vector2.zero(),
-        _velocity = vmath.Vector2(randomize(-3, 3), randomize(-3, 3)),
+        _velocity =
+            vmath.Vector2(Helper.randomize(-3, 3), Helper.randomize(-3, 3)),
         // _size = size,
         _pathShape = createParticlePath != null
             ? createParticlePath(size)
             : createPath(size),
-        _aVelocityX = randomize(-0.1, 0.1),
-        _aVelocityY = randomize(-0.1, 0.1),
-        _aVelocityZ = randomize(-0.1, 0.1),
+        _aVelocityX = Helper.randomize(-0.1, 0.1),
+        _aVelocityY = Helper.randomize(-0.1, 0.1),
+        _aVelocityZ = Helper.randomize(-0.1, 0.1),
         _gravity = lerpDouble(0.1, 5, gravity);
 
   final vmath.Vector2 _startUpForce;
