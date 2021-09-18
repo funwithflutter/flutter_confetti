@@ -1,8 +1,16 @@
-import 'dart:math';
-import 'dart:ui' as ui;
+import 'dart:math' show Random;
+import 'dart:ui' show lerpDouble;
+
+import 'package:flutter/material.dart';
 
 final _rand = Random();
 
-double randomize(double min, double max) {
-  return ui.lerpDouble(min, max, _rand.nextDouble())!;
+class Helper {
+  static double randomize(double min, double max) {
+    return lerpDouble(min, max, _rand.nextDouble())!;
+  }
+
+  static Color randomColor() {
+    return Colors.primaries[Random().nextInt(Colors.primaries.length)];
+  }
 }

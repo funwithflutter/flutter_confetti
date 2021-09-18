@@ -1,3 +1,8 @@
+## [UPCOMMING]
+🔄 Changed
+- Removed the random_color package and replaced with custom logic. Random colors may now be slightly different.
+- Updated dependencies
+
 ## [0.6.0-nullsafety]
 Now with null safety :) - Thanks Ali1Ammar!
 

@@ -15,13 +15,7 @@ scripts:
     description: |
       Run `dart analyze` in all packages.
        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
-  firebase:emulator:
-    run: |
-      cd .github/workflows/scripts && ./start-firebase-emulator.sh
-    description: |
-      Start the Firebase emulator suite. Used by Functions, Firestore, Auth and Storage
-      integration testing.
-       - Requires Node.js and NPM installed.
+
   format:
     run: dart pub global run flutter_plugin_tools format
     description: |
