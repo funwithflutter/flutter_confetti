@@ -1,7 +1,11 @@
 ## [UPCOMMING]
-🔄 Changed
+🔄  Changed
 - Removed the random_color package and replaced with custom logic. Random colors may now be slightly different.
 - Updated dependencies
+
+🐞 Fixed
+- Unmounted exception (https://github.com/funwithflutter/flutter_confetti/issues/36). Thanks Iiropel.
+- Moved `.super` call to the top of `initState`.
 
 ## [0.6.0-nullsafety]
 Now with null safety :) - Thanks Ali1Ammar!
