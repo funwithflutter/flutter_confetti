@@ -10,36 +10,47 @@ else
   # Get flutter
   git clone https://github.com/flutter/flutter.git
   FLUTTER=flutter/bin/flutter
-  export PATH="$PATH":"$FLUTTER"
+#   export PATH="$PATH":"$FLUTTER"
 fi
 
-# Setup FVM
-FVM=`which fvm`
-if [ $? -eq 0 ]
-then
-  # FVM is installed
-  FVM=`which fvm`
-else
-  # Get FVC
-  echo "Getting fvm"
-  $FLUTTER pub global activate fvm
-  export PATH="$PATH":"$HOME/.pub-cache/bin"
-  FVM=`which fvm`
-fi
+FLUTTER_CHANNEL=stable
+FLUTTER_VERSION=v2.5.1
+$FLUTTER channel $FLUTTER_CHANNEL
+$FLUTTER version $FLUTTER_VERSION
 
-echo "Installing FVM"
+# # Setup FVM
+# FVM=`which fvm`
+# if [ $? -eq 0 ]
+# then
+#   # FVM is installed
+#   FVM=`which fvm`
+# else
+#   # Get FVC
+#   echo "Getting fvm"
+#   $FLUTTER pub global activate fvm
+#   export PATH="$PATH":"$HOME/.pub-cache/bin"
+#   FVM=`which fvm`
+# fi
 
-$FVM install
+# echo "Installing FVM"
 
-echo "Running pub get"
+# $FVM install
 
-$FVM flutter pub get
+# echo "Running pub get"
+
+# $FVM flutter pub get
+
+# cd example
+
+# echo "Building Flutter web"
+
+# $FVM flutter build web --web-renderer canvaskit
+
+# cd ..
 
 cd example
 
-echo "Building Flutter web"
-
-$FVM flutter build web --web-renderer canvaskit
+$FLUTTER build web --web-renderer canvaskit
 
 cd ..
 
