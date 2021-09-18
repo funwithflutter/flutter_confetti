@@ -23,15 +23,18 @@ else
   echo "Getting fvm"
   $FLUTTER pub global activate fvm
   export PATH="$PATH":"$HOME/.pub-cache/bin"
+  FVM=`which fvm`
 fi
 
 
-fvm install
+FVM install
 
-fvm flutter pub get
+FVM flutter pub get
 
 cd example
 
-fvm flutter build web
+FVM flutter build web --web-renderer canvaskit
+
+cd ..
 
 echo "OK"
