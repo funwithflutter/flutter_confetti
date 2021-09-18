@@ -1,4 +1,4 @@
-## [UPCOMMING]
+## [0.6.0]
 🔄  Changed
 - Removed the random_color package and replaced with custom logic. Random colors may now be slightly different.
 - Updated dependencies
