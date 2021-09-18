@@ -26,14 +26,19 @@ else
   FVM=`which fvm`
 fi
 
+echo "Installing FVM"
 
-FVM install
+$FVM install
 
-FVM flutter pub get
+echo "Running pub get"
+
+$FVM flutter pub get
 
 cd example
 
-FVM flutter build web --web-renderer canvaskit
+echo "Building Flutter web"
+
+$FVM flutter build web --web-renderer canvaskit
 
 cd ..
 
