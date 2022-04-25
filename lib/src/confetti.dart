@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:confetti/src/particle.dart';
+import 'package:flutter/material.dart';
 
 import 'enums/blast_directionality.dart';
 import 'enums/confetti_controller_state.dart';
@@ -127,8 +127,7 @@ class ConfettiWidget extends StatefulWidget {
   _ConfettiWidgetState createState() => _ConfettiWidgetState();
 }
 
-class _ConfettiWidgetState extends State<ConfettiWidget>
-    with SingleTickerProviderStateMixin {
+class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProviderStateMixin {
   final GlobalKey _particleSystemKey = GlobalKey();
 
   late AnimationController _animController;
@@ -167,8 +166,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   void _initAnimation() {
-    _animController = AnimationController(
-        vsync: this, duration: widget.confettiController.duration);
+    _animController = AnimationController(vsync: this, duration: widget.confettiController.duration);
     _animation = Tween<double>(begin: 0, end: 1).animate(_animController);
     _animation
       ..addListener(_animationListener)
@@ -184,8 +182,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     if (widget.confettiController.state == ConfettiControllerState.playing) {
       _startAnimation();
       _startEmission();
-    } else if (widget.confettiController.state ==
-        ConfettiControllerState.stopped) {
+    } else if (widget.confettiController.state == ConfettiControllerState.stopped) {
       _stopEmission();
     }
   }
@@ -255,8 +252,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   Offset _getContainerPosition() {
-    final containerRenderBox =
-        _particleSystemKey.currentContext!.findRenderObject() as RenderBox;
+    final containerRenderBox = _particleSystemKey.currentContext!.findRenderObject() as RenderBox;
     return containerRenderBox.localToGlobal(Offset.zero);
   }
 
@@ -321,6 +317,9 @@ class ParticlePainter extends CustomPainter {
         _particlePaint = Paint()
           ..color = Colors.green
           ..style = PaintingStyle.fill,
+        _particleStrokePaint = Paint()
+          ..color = Colors.black
+          ..style = PaintingStyle.fill,
         super(repaint: repaint);
 
   final List<Particle> particles;
@@ -328,6 +327,7 @@ class ParticlePainter extends CustomPainter {
   final Paint _emitterPaint;
   final bool _paintEmitterTarget;
   final Paint _particlePaint;
+  final Paint _particleStrokePaint;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -359,6 +359,7 @@ class ParticlePainter extends CustomPainter {
 
       final finalPath = particle.path.transform(rotationMatrix4.storage);
       canvas.drawPath(finalPath, _particlePaint..color = particle.color);
+      canvas.drawPath(finalPath, _particleStrokePaint);
     }
   }
 
