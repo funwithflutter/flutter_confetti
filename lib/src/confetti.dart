@@ -20,6 +20,8 @@ class ConfettiWidget extends StatefulWidget {
     this.shouldLoop = false,
     this.displayTarget = false,
     this.colors,
+    this.strokeColor,
+    this.strokeWidth,
     this.minimumSize = const Size(20, 10),
     this.maximumSize = const Size(30, 15),
     this.particleDrag = 0.05,
@@ -96,6 +98,12 @@ class ConfettiWidget extends StatefulWidget {
 
   /// List of Colors to iterate over - if null then random values will be chosen
   final List<Color>? colors;
+
+  /// Stroke width of the confetti (0.0 by default, no stroke)
+  final double? strokeWidth;
+
+  /// Stroke coloer of the confetti (black by default, must have a strokeWidth > 0)
+  final Color? strokeColor;
 
   /// An optional parameter to set the minimum size potential size for
   /// the confetti.
@@ -285,6 +293,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProvid
         key: _particleSystemKey,
         foregroundPainter: ParticlePainter(
           _animController,
+          strokeWidth: widget.strokeWidth ?? 0,
+          strokeColor: widget.strokeColor ?? Colors.black,
           particles: _particleSystem.particles,
           paintEmitterTarget: widget.displayTarget,
         ),
@@ -307,8 +317,10 @@ class ParticlePainter extends CustomPainter {
   ParticlePainter(
     Listenable? repaint, {
     required this.particles,
+    required this.strokeWidth,
     bool paintEmitterTarget = true,
     Color emitterTargetColor = Colors.black,
+    Color strokeColor = Colors.black,
   })  : _paintEmitterTarget = paintEmitterTarget,
         _emitterPaint = Paint()
           ..color = emitterTargetColor
@@ -318,8 +330,9 @@ class ParticlePainter extends CustomPainter {
           ..color = Colors.green
           ..style = PaintingStyle.fill,
         _particleStrokePaint = Paint()
-          ..color = Colors.black
-          ..style = PaintingStyle.fill,
+          ..color = strokeColor
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke,
         super(repaint: repaint);
 
   final List<Particle> particles;
@@ -328,6 +341,7 @@ class ParticlePainter extends CustomPainter {
   final bool _paintEmitterTarget;
   final Paint _particlePaint;
   final Paint _particleStrokePaint;
+  final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -359,7 +373,9 @@ class ParticlePainter extends CustomPainter {
 
       final finalPath = particle.path.transform(rotationMatrix4.storage);
       canvas.drawPath(finalPath, _particlePaint..color = particle.color);
-      canvas.drawPath(finalPath, _particleStrokePaint);
+      if (strokeWidth > 0) {
+        canvas.drawPath(finalPath, _particleStrokePaint);
+      }
     }
   }
 
