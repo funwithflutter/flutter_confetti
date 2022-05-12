@@ -226,7 +226,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   void _startAnimation() {
     // Make sure widgets are built before setting screen size and position
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _setScreenSize();
         _setEmitterPosition();
