@@ -37,6 +37,8 @@ Other attributes that can be set are:
 * `minBlastForce` -> will determine the minimum blast force applied to a particle within it's first 5 frames of life. The default `minBlastForce` is set to `5`
 * `displayTarget` -> if `true` a crosshair will be displayed to show the location of the particle emitter
 * `colors` -> a list of colors can be provided to manually set the confetti colors. If omitted then random colors will be used. A single color, for example `[Colors.blue]`, or multiple colors `[Colors.blue, Colors.red, Colors.green]` can be provided as an argument in the `ConfettiWidget
+* `strokeWidth` optionally set to give a stroke to the paint. Needs to be bigger than 0 to be vissible. Default 0.
+* `strokeColor` optionally set to give a stroke color. Default black.
 * `minimumSize` -> a `Size` controlling the minimum possible size of the confetti. To be used in conjuction with `maximumSize`. For example, setting a `minimumSize` equal to `Size(10,10)` will ensure that the confetti will never be smaller than the specified size. Must be positive and smaller than the `maximumSize`. Can not be null.
 * `maximumSize` -> a `Size` controlling the maximum possible size of the confetti. To be used in conjuction with `minimumSize`. For example, setting a `maximumSize` equal to `Size(100,100)` will create confetti with a size somewhere between the minimum and maximum size of (100, 100) [widht, height]. Must be positive and bigger than the `minimumSize`, Can not be null.
 * `gravity` -> change the speed at which the confetti falls. A value between 0 and 1. The higher the value the faster it will fall. Default is set to `0.1`
