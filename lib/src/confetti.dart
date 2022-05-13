@@ -20,21 +20,25 @@ class ConfettiWidget extends StatefulWidget {
     this.shouldLoop = false,
     this.displayTarget = false,
     this.colors,
-    this.strokeColor,
-    this.strokeWidth,
+    this.strokeColor = Colors.black,
+    this.strokeWidth = 0,
     this.minimumSize = const Size(20, 10),
     this.maximumSize = const Size(30, 15),
     this.particleDrag = 0.05,
     this.canvas,
     this.child,
     this.createParticlePath,
-  })  : assert(emissionFrequency >= 0 &&
-            emissionFrequency <= 1 &&
-            numberOfParticles > 0 &&
-            maxBlastForce > 0 &&
-            minBlastForce > 0 &&
-            maxBlastForce > minBlastForce),
-        assert(gravity >= 0 && gravity <= 1),
+  })  : assert(
+          emissionFrequency >= 0 &&
+              emissionFrequency <= 1 &&
+              numberOfParticles > 0 &&
+              maxBlastForce > 0 &&
+              minBlastForce > 0 &&
+              maxBlastForce > minBlastForce,
+        ),
+        assert(gravity >= 0 && gravity <= 1,
+            '`gravity` needs to be between 0 and 1'),
+        assert(strokeWidth >= 0, '`strokeWidth needs to be bigger than 0'),
         super(key: key);
 
   /// Controls the animation.
@@ -100,10 +104,10 @@ class ConfettiWidget extends StatefulWidget {
   final List<Color>? colors;
 
   /// Stroke width of the confetti (0.0 by default, no stroke)
-  final double? strokeWidth;
+  final double strokeWidth;
 
-  /// Stroke coloer of the confetti (black by default, must have a strokeWidth > 0)
-  final Color? strokeColor;
+  /// Stroke color of the confetti (black by default, requires a strokeWidth > 0)
+  final Color strokeColor;
 
   /// An optional parameter to set the minimum size potential size for
   /// the confetti.
@@ -135,7 +139,8 @@ class ConfettiWidget extends StatefulWidget {
   _ConfettiWidgetState createState() => _ConfettiWidgetState();
 }
 
-class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProviderStateMixin {
+class _ConfettiWidgetState extends State<ConfettiWidget>
+    with SingleTickerProviderStateMixin {
   final GlobalKey _particleSystemKey = GlobalKey();
 
   late AnimationController _animController;
@@ -174,7 +179,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProvid
   }
 
   void _initAnimation() {
-    _animController = AnimationController(vsync: this, duration: widget.confettiController.duration);
+    _animController = AnimationController(
+        vsync: this, duration: widget.confettiController.duration);
     _animation = Tween<double>(begin: 0, end: 1).animate(_animController);
     _animation
       ..addListener(_animationListener)
@@ -190,7 +196,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProvid
     if (widget.confettiController.state == ConfettiControllerState.playing) {
       _startAnimation();
       _startEmission();
-    } else if (widget.confettiController.state == ConfettiControllerState.stopped) {
+    } else if (widget.confettiController.state ==
+        ConfettiControllerState.stopped) {
       _stopEmission();
     }
   }
@@ -231,7 +238,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProvid
 
   void _startAnimation() {
     // Make sure widgets are built before setting screen size and position
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _setScreenSize();
         _setEmitterPosition();
@@ -260,7 +267,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProvid
   }
 
   Offset _getContainerPosition() {
-    final containerRenderBox = _particleSystemKey.currentContext!.findRenderObject() as RenderBox;
+    final containerRenderBox =
+        _particleSystemKey.currentContext!.findRenderObject() as RenderBox;
     return containerRenderBox.localToGlobal(Offset.zero);
   }
 
@@ -293,8 +301,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget> with SingleTickerProvid
         key: _particleSystemKey,
         foregroundPainter: ParticlePainter(
           _animController,
-          strokeWidth: widget.strokeWidth ?? 0,
-          strokeColor: widget.strokeColor ?? Colors.black,
+          strokeWidth: widget.strokeWidth,
+          strokeColor: widget.strokeColor,
           particles: _particleSystem.particles,
           paintEmitterTarget: widget.displayTarget,
         ),
@@ -317,10 +325,10 @@ class ParticlePainter extends CustomPainter {
   ParticlePainter(
     Listenable? repaint, {
     required this.particles,
-    required this.strokeWidth,
     bool paintEmitterTarget = true,
     Color emitterTargetColor = Colors.black,
     Color strokeColor = Colors.black,
+    this.strokeWidth = 0,
   })  : _paintEmitterTarget = paintEmitterTarget,
         _emitterPaint = Paint()
           ..color = emitterTargetColor
