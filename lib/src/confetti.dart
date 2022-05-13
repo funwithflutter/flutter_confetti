@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:confetti/src/particle.dart';
+import 'package:flutter/material.dart';
 
 import 'enums/blast_directionality.dart';
 import 'enums/confetti_controller_state.dart';
@@ -20,19 +20,25 @@ class ConfettiWidget extends StatefulWidget {
     this.shouldLoop = false,
     this.displayTarget = false,
     this.colors,
+    this.strokeColor = Colors.black,
+    this.strokeWidth = 0,
     this.minimumSize = const Size(20, 10),
     this.maximumSize = const Size(30, 15),
     this.particleDrag = 0.05,
     this.canvas,
     this.child,
     this.createParticlePath,
-  })  : assert(emissionFrequency >= 0 &&
-            emissionFrequency <= 1 &&
-            numberOfParticles > 0 &&
-            maxBlastForce > 0 &&
-            minBlastForce > 0 &&
-            maxBlastForce > minBlastForce),
-        assert(gravity >= 0 && gravity <= 1),
+  })  : assert(
+          emissionFrequency >= 0 &&
+              emissionFrequency <= 1 &&
+              numberOfParticles > 0 &&
+              maxBlastForce > 0 &&
+              minBlastForce > 0 &&
+              maxBlastForce > minBlastForce,
+        ),
+        assert(gravity >= 0 && gravity <= 1,
+            '`gravity` needs to be between 0 and 1'),
+        assert(strokeWidth >= 0, '`strokeWidth needs to be bigger than 0'),
         super(key: key);
 
   /// Controls the animation.
@@ -96,6 +102,12 @@ class ConfettiWidget extends StatefulWidget {
 
   /// List of Colors to iterate over - if null then random values will be chosen
   final List<Color>? colors;
+
+  /// Stroke width of the confetti (0.0 by default, no stroke)
+  final double strokeWidth;
+
+  /// Stroke color of the confetti (black by default, requires a strokeWidth > 0)
+  final Color strokeColor;
 
   /// An optional parameter to set the minimum size potential size for
   /// the confetti.
@@ -289,6 +301,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
         key: _particleSystemKey,
         foregroundPainter: ParticlePainter(
           _animController,
+          strokeWidth: widget.strokeWidth,
+          strokeColor: widget.strokeColor,
           particles: _particleSystem.particles,
           paintEmitterTarget: widget.displayTarget,
         ),
@@ -313,6 +327,8 @@ class ParticlePainter extends CustomPainter {
     required this.particles,
     bool paintEmitterTarget = true,
     Color emitterTargetColor = Colors.black,
+    Color strokeColor = Colors.black,
+    this.strokeWidth = 0,
   })  : _paintEmitterTarget = paintEmitterTarget,
         _emitterPaint = Paint()
           ..color = emitterTargetColor
@@ -321,6 +337,10 @@ class ParticlePainter extends CustomPainter {
         _particlePaint = Paint()
           ..color = Colors.green
           ..style = PaintingStyle.fill,
+        _particleStrokePaint = Paint()
+          ..color = strokeColor
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke,
         super(repaint: repaint);
 
   final List<Particle> particles;
@@ -328,6 +348,8 @@ class ParticlePainter extends CustomPainter {
   final Paint _emitterPaint;
   final bool _paintEmitterTarget;
   final Paint _particlePaint;
+  final Paint _particleStrokePaint;
+  final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -359,6 +381,9 @@ class ParticlePainter extends CustomPainter {
 
       final finalPath = particle.path.transform(rotationMatrix4.storage);
       canvas.drawPath(finalPath, _particlePaint..color = particle.color);
+      if (strokeWidth > 0) {
+        canvas.drawPath(finalPath, _particleStrokePaint);
+      }
     }
   }
 
