@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:confetti/src/constants.dart';
 import 'package:confetti/src/particle.dart';
 import 'package:flutter/material.dart';
 
@@ -202,12 +203,23 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     }
   }
 
+  late var lastTime = DateTime.now().millisecondsSinceEpoch;
+
   void _animationListener() {
     if (_particleSystem.particleSystemStatus == ParticleSystemStatus.finished) {
       _animController.stop();
       return;
     }
-    _particleSystem.update();
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+    final deltaTime = (currentTime - lastTime) / 1000;
+
+    lastTime = currentTime;
+
+    if (deltaTime > kLowLimit) {
+      _particleSystem.update(kLowLimit);
+    } else {
+      _particleSystem.update(deltaTime);
+    }
   }
 
   void _animationStatusListener(AnimationStatus status) {

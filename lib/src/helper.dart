@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 final _rand = Random();
 
-class Helper {
+abstract class Helper {
   static double randomize(double min, double max) {
     return lerpDouble(min, max, _rand.nextDouble())!;
   }

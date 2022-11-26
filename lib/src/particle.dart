@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:confetti/src/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart' as vmath;
 
@@ -109,10 +110,10 @@ class ParticleSystem extends ChangeNotifier {
   List<Particle> get particles => _particles;
   ParticleSystemStatus? get particleSystemStatus => _particleSystemStatus;
 
-  void update() {
+  void update(double deltaTime) {
     _clean();
     if (_particleSystemStatus != ParticleSystemStatus.finished) {
-      _updateParticles();
+      _updateParticles(deltaTime);
     }
 
     if (_particleSystemStatus == ParticleSystemStatus.started) {
@@ -143,9 +144,9 @@ class ParticleSystem extends ChangeNotifier {
     _leftBorder = _screenSize!.width - _rightBorder;
   }
 
-  void _updateParticles() {
+  void _updateParticles(double deltaTime) {
     for (final particle in _particles) {
-      particle.update();
+      particle.update(deltaTime);
     }
   }
 
@@ -214,14 +215,16 @@ class Particle {
         _acceleration = vmath.Vector2.zero(),
         _velocity =
             vmath.Vector2(Helper.randomize(-3, 3), Helper.randomize(-3, 3)),
-        // _size = size,
         _pathShape = createParticlePath != null
             ? createParticlePath(size)
             : createPath(size),
         _aVelocityX = Helper.randomize(-0.1, 0.1),
         _aVelocityY = Helper.randomize(-0.1, 0.1),
         _aVelocityZ = Helper.randomize(-0.1, 0.1),
-        _gravity = lerpDouble(0.1, 5, gravity);
+        gravityVector = vmath.Vector2(
+          0,
+          lerpDouble(0.1, 5, gravity)!,
+        );
 
   final vmath.Vector2 _startUpForce;
 
@@ -236,7 +239,7 @@ class Particle {
   double _aVelocityY;
   double _aZ = 0;
   double _aVelocityZ;
-  final double? _gravity;
+  final vmath.Vector2 gravityVector;
   final _aAcceleration = 0.0001;
 
   final Color _color;
@@ -244,6 +247,7 @@ class Particle {
   final Path _pathShape;
 
   double _timeAlive = 0;
+  vmath.Vector2 windforceUp = vmath.Vector2(0, -1);
 
   static Path createPath(Size size) {
     final pathShape = Path()
@@ -255,53 +259,45 @@ class Particle {
     return pathShape;
   }
 
-  void applyForce(vmath.Vector2 force) {
+  void applyForce(vmath.Vector2 force, double deltaTimeSpeed) {
     final f = force.clone()..divide(vmath.Vector2.all(_mass));
-    _acceleration.add(f);
+    _acceleration.add(f * deltaTimeSpeed);
   }
 
-  void drag() {
+  void drag(double deltaTimeSpeed) {
     final speed = sqrt(pow(_velocity.x, 2) + pow(_velocity.y, 2));
     final dragMagnitude = _particleDrag * speed * speed;
     final drag = _velocity.clone()
       ..multiply(vmath.Vector2.all(-1))
       ..normalize()
       ..multiply(vmath.Vector2.all(dragMagnitude));
-    applyForce(drag);
+    applyForce(drag, deltaTimeSpeed);
   }
 
-  void _applyStartUpForce() {
-    applyForce(_startUpForce);
-  }
-
-  void _applyWindForceUp() {
-    applyForce(vmath.Vector2(0, -1));
-  }
-
-  void update() {
-    drag();
+  void update(double deltaTime) {
+    final deltaTimeSpeed = deltaTime * desiredSpeed;
+    drag(deltaTimeSpeed);
 
     if (_timeAlive < 5) {
-      _applyStartUpForce();
+      applyForce(_startUpForce, deltaTimeSpeed);
     }
     if (_timeAlive < 25) {
-      _applyWindForceUp();
+      applyForce(windforceUp, deltaTimeSpeed);
+      _timeAlive += 1;
     }
 
-    _timeAlive += 1;
+    applyForce(gravityVector, deltaTimeSpeed);
 
-    applyForce(vmath.Vector2(0, _gravity!));
-
-    _velocity.add(_acceleration);
-    _location.add(_velocity);
+    _velocity.add(_acceleration * deltaTimeSpeed);
+    _location.add(_velocity * deltaTimeSpeed);
     _acceleration.setZero();
 
     _aVelocityX += _aAcceleration / _mass;
     _aVelocityY += _aAcceleration / _mass;
     _aVelocityZ += _aAcceleration / _mass;
-    _aX += _aVelocityX;
-    _aY += _aVelocityY;
-    _aZ += _aVelocityZ;
+    _aX += _aVelocityX * deltaTimeSpeed;
+    _aY += _aVelocityY * deltaTimeSpeed;
+    _aZ += _aVelocityZ * deltaTimeSpeed;
   }
 
   Offset get location {
