@@ -1,3 +1,8 @@
+## Upcomming
+⛔️ Breaking!
+- Added the concept of delta time, to allow for better simulation when the refresh rate is 120 (or more than 60). There should be not noticable change on a 60fps screen, however, there may be variance if Flutter drops frames. No changes needed from a widget level.
+- `ParticleSystem.update` and `Pariticle.update` now contain a `deltaTime` argument. No changes needed from a widget level.
+
 ## [0.7.0]
 ⭐️ Added
 - Stroke width and color can now optionally be set. `strokeWidth` (default 0) and `strokeColor` (default black). Requires a stroke width bigger than 0
