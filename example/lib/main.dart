@@ -130,6 +130,8 @@ class _MyAppState extends State<MyApp> {
                 Colors.blue,
                 Colors.pink
               ], // manually specify the colors to be used
+              strokeWidth: 1,
+              strokeColor: Colors.white,
             ),
           ),
           Align(

@@ -1,3 +1,8 @@
+## [0.7.0]
+⭐️ Added
+- Stroke width and color can now optionally be set. `strokeWidth` (default 0) and `strokeColor` (default black). Requires a stroke width bigger than 0
+- Updated to Flutter 3.0
+
 ## [0.6.0]
 🔄  Changed
 - Removed the random_color package and replaced with custom logic. Random colors may now be slightly different.
