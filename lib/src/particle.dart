@@ -110,11 +110,20 @@ class ParticleSystem extends ChangeNotifier {
   List<Particle> get particles => _particles;
   ParticleSystemStatus? get particleSystemStatus => _particleSystemStatus;
 
-  void update(double deltaTime) {
+  void update(double deltaTime, {bool pauseEmission = false}) {
     _clean();
     if (_particleSystemStatus != ParticleSystemStatus.finished) {
       _updateParticles(deltaTime);
     }
+
+    if (_particleSystemStatus == ParticleSystemStatus.stopped &&
+        _particles.isEmpty) {
+      finishParticleEmission();
+      notifyListeners();
+    }
+
+    // Return early if pauseEmission is true
+    if (pauseEmission) return;
 
     if (_particleSystemStatus == ParticleSystemStatus.started) {
       // If there are no particles then immediately generate particles
@@ -129,12 +138,6 @@ class ParticleSystem extends ChangeNotifier {
       if (chanceToGenerate < _frequency) {
         _particles.addAll(_generateParticles(number: _numberOfParticles));
       }
-    }
-
-    if (_particleSystemStatus == ParticleSystemStatus.stopped &&
-        _particles.isEmpty) {
-      finishParticleEmission();
-      notifyListeners();
     }
   }
 

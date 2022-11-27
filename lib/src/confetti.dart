@@ -27,8 +27,9 @@ class ConfettiWidget extends StatefulWidget {
     this.maximumSize = const Size(30, 15),
     this.particleDrag = 0.05,
     this.canvas,
-    this.child,
+    this.pauseEmission = true,
     this.createParticlePath,
+    this.child,
   })  : assert(
           emissionFrequency >= 0 &&
               emissionFrequency <= 1 &&
@@ -130,8 +131,13 @@ class ConfettiWidget extends StatefulWidget {
   /// An optional parameter to specify the area size where the confetti will
   /// be thrown.
   ///
-  /// By default this is set to then screen size.
+  /// By default this is set to the window size.
   final Size? canvas;
+
+  /// If `true` new particles will not be created if the FPS is lower
+  /// than 60. Default is `true`, set to `false` to ensure particles are always
+  /// created, regardless of frame rate.
+  final bool pauseEmission;
 
   /// Child widget to display
   final Widget? child;
@@ -161,18 +167,19 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     widget.confettiController.addListener(_handleChange);
 
     _particleSystem = ParticleSystem(
-        emissionFrequency: widget.emissionFrequency,
-        numberOfParticles: widget.numberOfParticles,
-        maxBlastForce: widget.maxBlastForce,
-        minBlastForce: widget.minBlastForce,
-        gravity: widget.gravity,
-        blastDirection: widget.blastDirection,
-        blastDirectionality: widget.blastDirectionality,
-        colors: widget.colors,
-        minimumSize: widget.minimumSize,
-        maximumSize: widget.maximumSize,
-        particleDrag: widget.particleDrag,
-        createParticlePath: widget.createParticlePath);
+      emissionFrequency: widget.emissionFrequency,
+      numberOfParticles: widget.numberOfParticles,
+      maxBlastForce: widget.maxBlastForce,
+      minBlastForce: widget.minBlastForce,
+      gravity: widget.gravity,
+      blastDirection: widget.blastDirection,
+      blastDirectionality: widget.blastDirectionality,
+      colors: widget.colors,
+      minimumSize: widget.minimumSize,
+      maximumSize: widget.maximumSize,
+      particleDrag: widget.particleDrag,
+      createParticlePath: widget.createParticlePath,
+    );
 
     _particleSystem.addListener(_particleSystemListener);
 
@@ -216,7 +223,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     lastTime = currentTime;
 
     if (deltaTime > kLowLimit) {
-      _particleSystem.update(kLowLimit);
+      _particleSystem.update(kLowLimit, pauseEmission: widget.pauseEmission);
     } else {
       _particleSystem.update(deltaTime);
     }
