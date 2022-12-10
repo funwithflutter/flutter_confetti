@@ -9,6 +9,11 @@ import 'package:confetti/src/helper.dart';
 
 import 'enums/blast_directionality.dart';
 
+/// Status of the particle system:
+///
+/// - started
+/// - finished
+/// - stopped
 enum ParticleSystemStatus {
   started,
   finished,
@@ -92,7 +97,8 @@ class ParticleSystem extends ChangeNotifier {
 
   set screenSize(Size size) {
     _screenSize = size;
-    _setScreenBorderPositions(); // needs to be called here to only set the borders once
+    // needs to be called here to only set the borders once
+    _setScreenBorderPositions();
   }
 
   void stopParticleEmission() {
@@ -298,6 +304,7 @@ class Particle {
     _aVelocityX += _aAcceleration / _mass;
     _aVelocityY += _aAcceleration / _mass;
     _aVelocityZ += _aAcceleration / _mass;
+
     _aX += _aVelocityX * deltaTimeSpeed;
     _aY += _aVelocityY * deltaTimeSpeed;
     _aZ += _aVelocityZ * deltaTimeSpeed;

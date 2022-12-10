@@ -59,7 +59,7 @@ class ConfettiWidget extends StatefulWidget {
   /// The [blastDirectionality] is an enum that takes one of two
   /// values - directional or explosive.
   ///
-  /// The default is set to directional
+  /// The default is set to [BlastDirectionality.directional].
   final BlastDirectionality blastDirectionality;
 
   /// The [blastDirection] is a radial value to determine the direction of the
@@ -79,6 +79,7 @@ class ConfettiWidget extends StatefulWidget {
   /// The higher the [gravity] the faster it will fall.
   ///
   /// It can be set to a value between `0` and `1`
+  ///
   /// Default value is `0.1`
   final double gravity;
 
@@ -157,8 +158,9 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   /// Keeps track of emition position on screen layout changes
   Offset? _emitterPosition;
 
-  /// Keeps track of the screen size on layout changes
-  /// Controls the sizing restrictions for when confetti should be vissible
+  /// Keeps track of the screen size on layout changes.
+  ///
+  /// Controls the sizing restrictions for when confetti should be visible.
   Size _screenSize = const Size(0, 0);
 
   @override
