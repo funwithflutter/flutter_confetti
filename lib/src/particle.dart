@@ -116,6 +116,7 @@ class ParticleSystem extends ChangeNotifier {
   List<Particle> get particles => _particles;
   ParticleSystemStatus? get particleSystemStatus => _particleSystemStatus;
 
+  /// Update the particle system animation by moving it forward.
   void update(double deltaTime, {bool pauseEmission = false}) {
     _clean();
     if (_particleSystemStatus != ParticleSystemStatus.finished) {

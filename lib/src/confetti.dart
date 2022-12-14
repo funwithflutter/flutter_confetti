@@ -56,10 +56,10 @@ class ConfettiWidget extends StatefulWidget {
   /// life. The default [minBlastForce] is set to `5`
   final double minBlastForce;
 
-  /// The [blastDirectionality] is an enum that takes one of two
-  /// values - directional or explosive.
+  /// {@macro blast_directionality}
   ///
-  /// The default is set to [BlastDirectionality.directional].
+  /// The default value is [BlastDirectionality.directional], the direction
+  /// can be set with [blastDirection].
   final BlastDirectionality blastDirectionality;
 
   /// The [blastDirection] is a radial value to determine the direction of the
@@ -69,10 +69,10 @@ class ConfettiWidget extends StatefulWidget {
   /// A value of `PI` will emit to the left of the canvas/screen.
   final double blastDirection;
 
-  /// The [createParticlePath] is optional function that returns custom Path
-  /// needed to generate particles.
+  /// The [createParticlePath] is an optional function that returns a custom
+  /// `Path` to generate particles.
   ///
-  /// The default function returns rectangular path
+  /// The default function returns a rectangular path.
   final Path Function(Size size)? createParticlePath;
 
   /// The [gravity] is the speed at which the confetti will fall.
@@ -422,6 +422,7 @@ class ConfettiController extends ChangeNotifier {
 
   ConfettiControllerState _state = ConfettiControllerState.stopped;
 
+  /// {@macro confetti_controller_state}
   ConfettiControllerState get state => _state;
 
   void play() {
