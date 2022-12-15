@@ -1,7 +1,18 @@
 ## Upcomming
 ⛔️ Breaking!
-- Added the concept of delta time, to allow for better simulation when the refresh rate is 120 (or more than 60). There should be not noticable change on a 60fps screen, however, there may be variance if Flutter drops frames. No changes needed from a widget level.
+- Added the concept of delta time, to allow for better simulation when the refresh rate is 120 (or more than 60). There should be no noticable change on a 60fps screen, however, there may be variance if Flutter drops frames. No changes needed from a widget level.
 - `ParticleSystem.update` and `Pariticle.update` now contain a `deltaTime` argument. No changes needed from a widget level.
+
+⭐️ Added
+- `clearAllParticles` added to stop method on controller: `_confettiController.stop(clearAllParticles: true);` default is false. If true particles will immediately be cleared/removed on stop. Calling `dispose` will also clear all particles immediately.
+- `particleStatsCallback` added to `Confetti` widget to retrieve the `ParticleStats`. This provides info on the particle system, such as number of active and number of total particles in memory.
+- `pauseEmissionOnLowFrameRate` to `Confetti` widget. Default is true. This will pause additional confetti emission if the frame rate is below 60fps. This can be disabled by setting to `false`, to force particle creation regardless of frame rate.
+
+⚡️ Improved
+- Various performance improvements!
+  - Confetti is now conditionally reused instead of recreated, big improvement
+  - 120hz refresh rate supported
+  - `pauseEmissionOnLowFrameRate` boolean added to `Confetti` widget to ensure smooth 60 FPS. This may however result in no confetti appearing if other complex operations are taking up resources.
 
 ## [0.7.0]
 ⭐️ Added

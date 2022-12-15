@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:confetti/src/particle_stats.dart';
 import 'package:confetti/src/constants.dart';
 import 'package:confetti/src/particle.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class ConfettiWidget extends StatefulWidget {
     this.maximumSize = const Size(30, 15),
     this.particleDrag = 0.05,
     this.canvas,
-    this.pauseEmission = true,
+    this.pauseEmissionOnLowFrameRate = true,
     this.createParticlePath,
     this.child,
   })  : assert(
@@ -138,7 +139,7 @@ class ConfettiWidget extends StatefulWidget {
   /// If `true` new particles will not be created if the FPS is lower
   /// than 60. Default is `true`, set to `false` to ensure particles are always
   /// created, regardless of frame rate.
-  final bool pauseEmission;
+  final bool pauseEmissionOnLowFrameRate;
 
   /// Child widget to display
   final Widget? child;
@@ -156,7 +157,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   late ParticleSystem _particleSystem;
 
   /// Keeps track of emition position on screen layout changes
-  Offset? _emitterPosition;
+  late Offset _emitterPosition;
 
   /// Keeps track of the screen size on layout changes.
   ///
@@ -209,6 +210,12 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     } else if (widget.confettiController.state ==
         ConfettiControllerState.stopped) {
       _stopEmission();
+    } else if (widget.confettiController.state ==
+        ConfettiControllerState.stoppedAndCleared) {
+      _stopEmission(clearAllParticles: true);
+    } else if (widget.confettiController.state ==
+        ConfettiControllerState.disposed) {
+      _stopEmission(clearAllParticles: true);
     }
   }
 
@@ -225,10 +232,18 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     lastTime = currentTime;
 
     if (deltaTime > kLowLimit) {
-      _particleSystem.update(kLowLimit, pauseEmission: widget.pauseEmission);
+      _particleSystem.update(kLowLimit,
+          pauseEmission: widget.pauseEmissionOnLowFrameRate);
     } else {
       _particleSystem.update(deltaTime);
     }
+
+    widget.confettiController.particleStatsCallback?.call(
+      ParticleStats(
+        numberOfParticles: _particleSystem.numberOfParticles,
+        activeNumberOfParticles: _particleSystem.activeNumberOfParticles,
+      ),
+    );
   }
 
   void _animationStatusListener(AnimationStatus status) {
@@ -250,11 +265,11 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     _particleSystem.startParticleEmission();
   }
 
-  void _stopEmission() {
+  void _stopEmission({bool clearAllParticles = false}) {
     if (_particleSystem.particleSystemStatus == ParticleSystemStatus.stopped) {
       return;
     }
-    _particleSystem.stopParticleEmission();
+    _particleSystem.stopParticleEmission(clearAllParticles: clearAllParticles);
   }
 
   void _startAnimation() {
@@ -289,8 +304,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   Offset _getContainerPosition() {
     final containerRenderBox =
-        _particleSystemKey.currentContext!.findRenderObject() as RenderBox;
-    return containerRenderBox.localToGlobal(Offset.zero);
+        _particleSystemKey.currentContext?.findRenderObject() as RenderBox?;
+    return containerRenderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
   }
 
   Size _getScreenSize() {
@@ -308,18 +323,17 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   void _updatePositionAndSize() {
     if (_getScreenSize() != _screenSize) {
       _setScreenSize();
-      if (_emitterPosition != null) {
-        _setEmitterPosition();
-      }
+      _setEmitterPosition();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    _updatePositionAndSize();
+    _updatePositionAndSize(); // TODO: improve
     return RepaintBoundary(
       child: CustomPaint(
         key: _particleSystemKey,
+        willChange: true,
         foregroundPainter: ParticlePainter(
           _animController,
           strokeWidth: widget.strokeWidth,
@@ -394,6 +408,7 @@ class ParticlePainter extends CustomPainter {
 
   void _paintParticles(Canvas canvas) {
     for (final particle in particles) {
+      if (!particle.active) continue;
       final rotationMatrix4 = Matrix4.identity()
         ..translate(particle.location.dx, particle.location.dy)
         ..rotateX(particle.angleX)
@@ -414,9 +429,16 @@ class ParticlePainter extends CustomPainter {
   }
 }
 
+/// {@template particle_stats_callback}
+/// This callback provides [ParticleStats] as an argument.
+/// {@endtemplate}
+typedef ParticleStatsCallback = void Function(ParticleStats stats);
+
 class ConfettiController extends ChangeNotifier {
-  ConfettiController({this.duration = const Duration(seconds: 30)})
-      : assert(!duration.isNegative && duration.inMicroseconds > 0);
+  ConfettiController({
+    this.duration = const Duration(seconds: 30),
+    this.particleStatsCallback,
+  }) : assert(!duration.isNegative && duration.inMicroseconds > 0);
 
   Duration duration;
 
@@ -425,13 +447,30 @@ class ConfettiController extends ChangeNotifier {
   /// {@macro confetti_controller_state}
   ConfettiControllerState get state => _state;
 
+  /// {@macro particle_stats_callback}
+  final ParticleStatsCallback? particleStatsCallback;
+
   void play() {
     _state = ConfettiControllerState.playing;
     notifyListeners();
   }
 
-  void stop() {
-    _state = ConfettiControllerState.stopped;
+  void stop({bool clearAllParticles = false}) {
+    // if state is already disposed, it can not be stopped.
+    if (_state == ConfettiControllerState.disposed) return;
+
+    if (clearAllParticles) {
+      _state = ConfettiControllerState.stoppedAndCleared;
+    } else {
+      _state = ConfettiControllerState.stopped;
+    }
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _state = ConfettiControllerState.disposed;
+    notifyListeners();
+    super.dispose();
   }
 }

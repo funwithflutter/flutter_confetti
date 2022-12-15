@@ -9,11 +9,14 @@ import 'package:confetti/src/helper.dart';
 
 import 'enums/blast_directionality.dart';
 
-/// Status of the particle system:
+/// {@template particle_system_status}
+/// Represents the current status of the particle system.
 ///
-/// - started
-/// - finished
-/// - stopped
+/// This enum has three possible values:
+/// - `started`: the particle system has been started and is currently running.
+/// - `finished`: the particle system has finished running and is no longer active.
+/// - `stopped`: the particle system has been manually stopped and is no longer active.
+/// {@endtemplate}
 enum ParticleSystemStatus {
   started,
   finished,
@@ -82,8 +85,8 @@ class ParticleSystem extends ChangeNotifier {
   final double _particleDrag;
   final Path Function(Size size)? _createParticlePath;
 
-  Offset? _particleSystemPosition;
-  Size? _screenSize;
+  Offset _particleSystemPosition = Offset.zero;
+  Size _screenSize = Size.zero;
 
   late double _bottomBorder;
   late double _rightBorder;
@@ -91,7 +94,7 @@ class ParticleSystem extends ChangeNotifier {
 
   final Random _rand;
 
-  set particleSystemPosition(Offset? position) {
+  set particleSystemPosition(Offset position) {
     _particleSystemPosition = position;
   }
 
@@ -101,8 +104,11 @@ class ParticleSystem extends ChangeNotifier {
     _setScreenBorderPositions();
   }
 
-  void stopParticleEmission() {
+  void stopParticleEmission({bool clearAllParticles = false}) {
     _particleSystemStatus = ParticleSystemStatus.stopped;
+    if (clearAllParticles) {
+      _particles.clear();
+    }
   }
 
   void startParticleEmission() {
@@ -110,20 +116,45 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   void finishParticleEmission() {
+    _particles.clear();
     _particleSystemStatus = ParticleSystemStatus.finished;
   }
 
+  /// List of all [Particle]s.
   List<Particle> get particles => _particles;
+
+  /// The number of particles in memory. Consists of active and deactive
+  /// particles.
+  ///
+  /// Old particles that are no longer visible are deactivated, and reused when
+  /// needed. New particles are only created when there is an insuffient number
+  /// of deactive particles in memory.
+  int get numberOfParticles => _particles.length;
+
+  /// The number of active particles currently animating and visible.
+  ///
+  /// This is not the same as [numberOfParticles].
+  int get activeNumberOfParticles => _particles.fold(
+        0,
+        (previousValue, element) {
+          if (element.active) {
+            return previousValue + 1;
+          } else {
+            return previousValue;
+          }
+        },
+      );
+
+  /// {@macro particle_system_status}
   ParticleSystemStatus? get particleSystemStatus => _particleSystemStatus;
 
   /// Update the particle system animation by moving it forward.
   void update(double deltaTime, {bool pauseEmission = false}) {
-    _clean();
     if (_particleSystemStatus != ParticleSystemStatus.finished) {
       _updateParticles(deltaTime);
     }
 
-    if (_particleSystemStatus == ParticleSystemStatus.stopped &&
+    if ((_particleSystemStatus == ParticleSystemStatus.stopped) &&
         _particles.isEmpty) {
       finishParticleEmission();
       notifyListeners();
@@ -136,49 +167,78 @@ class ParticleSystem extends ChangeNotifier {
       // If there are no particles then immediately generate particles
       // This also ensures that particles are emitted on the first frame
       if (particles.isEmpty) {
-        _particles.addAll(_generateParticles(number: _numberOfParticles));
+        _addParticles(_particles, number: _numberOfParticles);
         return;
       }
 
       // Determines whether to generate new particles based on the [frequency]
       final chanceToGenerate = _rand.nextDouble();
       if (chanceToGenerate < _frequency) {
-        _particles.addAll(_generateParticles(number: _numberOfParticles));
+        _addParticles(_particles, number: _numberOfParticles);
       }
     }
   }
 
   void _setScreenBorderPositions() {
-    _bottomBorder = _screenSize!.height * 1.1;
-    _rightBorder = _screenSize!.width * 1.1;
-    _leftBorder = _screenSize!.width - _rightBorder;
+    _bottomBorder = _screenSize.height * 1.1;
+    _rightBorder = _screenSize.width * 1.1;
+    _leftBorder = _screenSize.width - _rightBorder;
   }
 
   void _updateParticles(double deltaTime) {
+    // remove particles from memory if system is stopped, update and return
+    if (_particleSystemStatus == ParticleSystemStatus.stopped) {
+      _particles
+          .removeWhere((particle) => _isOutsideOfBorder(particle.location));
+      for (final particle in _particles) {
+        particle.update(deltaTime);
+      }
+      return;
+    }
+
+    // deactivate particles no longer visible and update rest
     for (final particle in _particles) {
+      if (_isOutsideOfBorder(particle.location)) {
+        particle.deactivate();
+        continue;
+      }
       particle.update(deltaTime);
     }
   }
 
-  void _clean() {
-    if (_particleSystemPosition != null && _screenSize != null) {
-      _particles
-          .removeWhere((particle) => _isOutsideOfBorder(particle.location));
-    }
-  }
-
   bool _isOutsideOfBorder(Offset particleLocation) {
-    final globalParticlePosition = particleLocation + _particleSystemPosition!;
+    final globalParticlePosition = particleLocation + _particleSystemPosition;
     return (globalParticlePosition.dy >= _bottomBorder) ||
         (globalParticlePosition.dx >= _rightBorder) ||
         (globalParticlePosition.dx <= _leftBorder);
   }
 
-  List<Particle> _generateParticles({int number = 1}) {
-    return List<Particle>.generate(
-        number,
-        (i) => Particle(_generateParticleForce(), _randomColor(), _randomSize(),
-            _gravity, _particleDrag, _createParticlePath));
+  void _addParticles(List<Particle> particles, {int number = 1}) {
+    int count = 0;
+
+    for (final particle in particles) {
+      if (!particle.active) {
+        particle.reactivate();
+        count++;
+        if (count == number) {
+          return; // exit early, no need to generate more particles
+        }
+      }
+    }
+
+    // create more particles not enough in memory
+    for (var i = 0; i < number - count; i++) {
+      particles.add(
+        Particle(
+          _randomColor(),
+          _randomSize(),
+          _gravity,
+          _particleDrag,
+          _createParticlePath,
+          generateParticleForceCallback: _generateParticleForce,
+        ),
+      );
+    }
   }
 
   double get _randomBlastDirection =>
@@ -214,10 +274,17 @@ class ParticleSystem extends ChangeNotifier {
   }
 }
 
+typedef GenerateParticleForceCallback = vmath.Vector2 Function();
+
 class Particle {
-  Particle(vmath.Vector2 startUpForce, Color color, Size size, double gravity,
-      double particleDrag, Path Function(Size size)? createParticlePath)
-      : _startUpForce = startUpForce,
+  Particle(
+    Color color,
+    Size size,
+    this.gravity,
+    double particleDrag,
+    Path Function(Size size)? createParticlePath, {
+    required this.generateParticleForceCallback,
+  })  : _startUpForce = generateParticleForceCallback(),
         _color = color,
         _mass = Helper.randomize(1, 11),
         _particleDrag = particleDrag,
@@ -234,9 +301,13 @@ class Particle {
         gravityVector = vmath.Vector2(
           0,
           lerpDouble(0.1, 5, gravity)!,
-        );
+        ),
+        _active = true;
+
+  final double gravity;
 
   final vmath.Vector2 _startUpForce;
+  final GenerateParticleForceCallback generateParticleForceCallback;
 
   final vmath.Vector2 _location;
   final vmath.Vector2 _velocity;
@@ -256,6 +327,9 @@ class Particle {
   final double _mass;
   final Path _pathShape;
 
+  bool _active;
+  bool get active => _active;
+
   double _timeAlive = 0;
   vmath.Vector2 windforceUp = vmath.Vector2(0, -1);
 
@@ -267,6 +341,35 @@ class Particle {
       ..lineTo(0, size.height)
       ..close();
     return pathShape;
+  }
+
+  void reactivate() {
+    _timeAlive = 0;
+
+    final f = generateParticleForceCallback();
+    _startUpForce.setValues(f.x, f.y);
+
+    _location.setValues(0, 0);
+    _acceleration.setValues(0, 0);
+    _velocity.setValues(Helper.randomize(-3, 3), Helper.randomize(-3, 3));
+
+    _aX = 0;
+    _aY = 0;
+    _aZ = 0;
+    _aVelocityX = Helper.randomize(-0.1, 0.1);
+    _aVelocityY = Helper.randomize(-0.1, 0.1);
+    _aVelocityZ = Helper.randomize(-0.1, 0.1);
+
+    gravityVector.setValues(
+      0,
+      lerpDouble(0.1, 5, gravity)!,
+    );
+
+    _active = true;
+  }
+
+  void deactivate() {
+    _active = false;
   }
 
   void applyForce(vmath.Vector2 force, double deltaTimeSpeed) {
