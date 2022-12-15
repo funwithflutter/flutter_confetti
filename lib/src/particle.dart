@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:confetti/src/constants.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart' as vmath;
 
@@ -340,6 +341,16 @@ class Particle {
       ..lineTo(-size.width, size.height)
       ..lineTo(0, size.height)
       ..close();
+
+    // TODO: remove when this is fixed: https://github.com/funwithflutter/flutter_confetti/issues/66
+    if (kIsWeb) {
+      pathShape
+        ..lineTo(-size.width, 0)
+        ..lineTo(-size.width, size.height)
+        ..lineTo(0, size.height)
+        ..close();
+    }
+
     return pathShape;
   }
 

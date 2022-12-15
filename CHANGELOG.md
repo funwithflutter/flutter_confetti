@@ -13,6 +13,7 @@
   - Confetti is now conditionally reused instead of recreated, big improvement
   - 120hz refresh rate supported
   - `pauseEmissionOnLowFrameRate` boolean added to `Confetti` widget to ensure smooth 60 FPS. This may however result in no confetti appearing if other complex operations are taking up resources.
+  - Temporary fix for issue [[#66](https://github.com/funwithflutter/flutter_confetti/issues/66)] with severe perf issues on Chrome macOS.
 
 ## [0.7.0]
 ⭐️ Added
