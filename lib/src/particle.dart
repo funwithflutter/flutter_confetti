@@ -299,6 +299,7 @@ class Particle {
         _aVelocityX = Helper.randomize(-0.1, 0.1),
         _aVelocityY = Helper.randomize(-0.1, 0.1),
         _aVelocityZ = Helper.randomize(-0.1, 0.1),
+        _rotateZ = Helper.randomBool(),
         gravityVector = vmath.Vector2(
           0,
           lerpDouble(0.1, 5, gravity)!,
@@ -322,7 +323,7 @@ class Particle {
   double _aZ = 0;
   double _aVelocityZ;
   final vmath.Vector2 gravityVector;
-  final _aAcceleration = 0.0001;
+  late final _aAcceleration = 0.0001 / _mass;
 
   final Color _color;
   final double _mass;
@@ -330,6 +331,8 @@ class Particle {
 
   bool _active;
   bool get active => _active;
+
+  final bool _rotateZ;
 
   double _timeAlive = 0;
   vmath.Vector2 windforceUp = vmath.Vector2(0, -1);
@@ -416,13 +419,16 @@ class Particle {
     _location.add(_velocity * deltaTimeSpeed);
     _acceleration.setZero();
 
-    _aVelocityX += _aAcceleration / _mass;
-    _aVelocityY += _aAcceleration / _mass;
-    _aVelocityZ += _aAcceleration / _mass;
-
+    _aVelocityX += _aAcceleration;
     _aX += _aVelocityX * deltaTimeSpeed;
+
+    _aVelocityY += _aAcceleration;
     _aY += _aVelocityY * deltaTimeSpeed;
-    _aZ += _aVelocityZ * deltaTimeSpeed;
+
+    if (_rotateZ) {
+      _aZ += _aVelocityZ * deltaTimeSpeed;
+      _aVelocityZ += _aAcceleration;
+    }
   }
 
   Offset get location {
@@ -438,4 +444,6 @@ class Particle {
   double get angleX => _aX;
   double get angleY => _aY;
   double get angleZ => _aZ;
+
+  bool get rotateZ => _rotateZ;
 }

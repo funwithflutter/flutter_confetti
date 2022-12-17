@@ -412,8 +412,11 @@ class ParticlePainter extends CustomPainter {
       final rotationMatrix4 = Matrix4.identity()
         ..translate(particle.location.dx, particle.location.dy)
         ..rotateX(particle.angleX)
-        ..rotateY(particle.angleY)
-        ..rotateZ(particle.angleZ);
+        ..rotateY(particle.angleY);
+
+      if (particle.rotateZ) {
+        rotationMatrix4.rotateZ(particle.angleZ);
+      }
 
       final finalPath = particle.path.transform(rotationMatrix4.storage);
       canvas.drawPath(finalPath, _particlePaint..color = particle.color);

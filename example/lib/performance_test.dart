@@ -12,7 +12,7 @@ class ConfettiPerformanceTestSample extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'Confetti Performance Test',
-        // showPerformanceOverlay: true,
+        showPerformanceOverlay: true,
         home: Scaffold(
           backgroundColor: Colors.grey[900],
           body: MyApp(),
