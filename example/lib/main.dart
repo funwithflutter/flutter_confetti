@@ -9,14 +9,13 @@ class ConfettiSample extends StatelessWidget {
   const ConfettiSample({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context) => MaterialApp(
         title: 'Confetti',
         home: Scaffold(
           backgroundColor: Colors.grey[900],
           body: MyApp(),
-        ));
-  }
+        ),
+      );
 }
 
 class MyApp extends StatefulWidget {
@@ -53,12 +52,13 @@ class _MyAppState extends State<MyApp> {
     _controllerCenterLeft.dispose();
     _controllerTopCenter.dispose();
     _controllerBottomCenter.dispose();
+
     super.dispose();
   }
 
   /// A custom Path to paint stars.
   Path drawStar(Size size) {
-    // Method to convert degree to radians
+    // Method to convert degrees to radians
     double degToRad(double deg) => deg * (pi / 180.0);
 
     const numberOfPoints = 5;
@@ -108,10 +108,11 @@ class _MyAppState extends State<MyApp> {
           Align(
             alignment: Alignment.center,
             child: TextButton(
-                onPressed: () {
-                  _controllerCenter.play();
-                },
-                child: _display('blast\nstars')),
+              onPressed: () {
+                _controllerCenter.play();
+              },
+              child: _text('blast\nstars'),
+            ),
           ),
 
           //CENTER RIGHT -- Emit left
@@ -137,10 +138,11 @@ class _MyAppState extends State<MyApp> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-                onPressed: () {
-                  _controllerCenterRight.play();
-                },
-                child: _display('pump left')),
+              onPressed: () {
+                _controllerCenterRight.play();
+              },
+              child: _text('pump left'),
+            ),
           ),
 
           //CENTER LEFT - Emit right
@@ -150,10 +152,10 @@ class _MyAppState extends State<MyApp> {
               confettiController: _controllerCenterLeft,
               blastDirection: 0, // radial value - RIGHT
               emissionFrequency: 0.6,
-              minimumSize: const Size(10,
-                  10), // set the minimum potential size for the confetti (width, height)
-              maximumSize: const Size(50,
-                  50), // set the maximum potential size for the confetti (width, height)
+              // set the minimum potential size for the confetti (width, height)
+              minimumSize: const Size(10, 10),
+              // set the maximum potential size for the confetti (width, height)
+              maximumSize: const Size(50, 50),
               numberOfParticles: 1,
               gravity: 0.1,
             ),
@@ -161,10 +163,11 @@ class _MyAppState extends State<MyApp> {
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton(
-                onPressed: () {
-                  _controllerCenterLeft.play();
-                },
-                child: _display('singles')),
+              onPressed: () {
+                _controllerCenterLeft.play();
+              },
+              child: _text('singles'),
+            ),
           ),
 
           //TOP CENTER - shoot down
@@ -186,9 +189,9 @@ class _MyAppState extends State<MyApp> {
                 onPressed: () {
                   _controllerTopCenter.play();
                 },
-                child: _display('goliath')),
+                child: _text('goliath')),
           ),
-          //BOTTOM CENTER
+          //BOTTOM CENTER - Shoot up
           Align(
             alignment: Alignment.bottomCenter,
             child: ConfettiWidget(
@@ -204,20 +207,19 @@ class _MyAppState extends State<MyApp> {
           Align(
             alignment: Alignment.bottomCenter,
             child: TextButton(
-                onPressed: () {
-                  _controllerBottomCenter.play();
-                },
-                child: _display('hard and infrequent')),
+              onPressed: () {
+                _controllerBottomCenter.play();
+              },
+              child: _text('hard and infrequent'),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Text _display(String text) {
-    return Text(
-      text,
-      style: const TextStyle(color: Colors.white, fontSize: 20),
-    );
-  }
+  Text _text(String text) => Text(
+        text,
+        style: const TextStyle(color: Colors.white, fontSize: 20),
+      );
 }

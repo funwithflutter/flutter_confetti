@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:confetti/src/particle_stats.dart';
 import 'package:confetti/src/constants.dart';
 import 'package:confetti/src/particle.dart';
 import 'package:flutter/material.dart';
@@ -27,8 +28,9 @@ class ConfettiWidget extends StatefulWidget {
     this.maximumSize = const Size(30, 15),
     this.particleDrag = 0.05,
     this.canvas,
-    this.child,
+    this.pauseEmissionOnLowFrameRate = true,
     this.createParticlePath,
+    this.child,
   })  : assert(
           emissionFrequency >= 0 &&
               emissionFrequency <= 1 &&
@@ -55,10 +57,10 @@ class ConfettiWidget extends StatefulWidget {
   /// life. The default [minBlastForce] is set to `5`
   final double minBlastForce;
 
-  /// The [blastDirectionality] is an enum that takes one of two
-  /// values - directional or explosive.
+  /// {@macro blast_directionality}
   ///
-  /// The default is set to directional
+  /// The default value is [BlastDirectionality.directional], the direction
+  /// can be set with [blastDirection].
   final BlastDirectionality blastDirectionality;
 
   /// The [blastDirection] is a radial value to determine the direction of the
@@ -68,16 +70,17 @@ class ConfettiWidget extends StatefulWidget {
   /// A value of `PI` will emit to the left of the canvas/screen.
   final double blastDirection;
 
-  /// The [createParticlePath] is optional function that returns custom Path
-  /// needed to generate particles.
+  /// The [createParticlePath] is an optional function that returns a custom
+  /// `Path` to generate particles.
   ///
-  /// The default function returns rectangular path
+  /// The default function returns a rectangular path.
   final Path Function(Size size)? createParticlePath;
 
   /// The [gravity] is the speed at which the confetti will fall.
   /// The higher the [gravity] the faster it will fall.
   ///
   /// It can be set to a value between `0` and `1`
+  ///
   /// Default value is `0.1`
   final double gravity;
 
@@ -130,8 +133,13 @@ class ConfettiWidget extends StatefulWidget {
   /// An optional parameter to specify the area size where the confetti will
   /// be thrown.
   ///
-  /// By default this is set to then screen size.
+  /// By default this is set to the window size.
   final Size? canvas;
+
+  /// If `true` new particles will not be created if the FPS is lower
+  /// than 60. Default is `true`, set to `false` to ensure particles are always
+  /// created, regardless of frame rate.
+  final bool pauseEmissionOnLowFrameRate;
 
   /// Child widget to display
   final Widget? child;
@@ -149,10 +157,11 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   late ParticleSystem _particleSystem;
 
   /// Keeps track of emition position on screen layout changes
-  Offset? _emitterPosition;
+  late Offset _emitterPosition;
 
-  /// Keeps track of the screen size on layout changes
-  /// Controls the sizing restrictions for when confetti should be vissible
+  /// Keeps track of the screen size on layout changes.
+  ///
+  /// Controls the sizing restrictions for when confetti should be visible.
   Size _screenSize = const Size(0, 0);
 
   @override
@@ -161,18 +170,19 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     widget.confettiController.addListener(_handleChange);
 
     _particleSystem = ParticleSystem(
-        emissionFrequency: widget.emissionFrequency,
-        numberOfParticles: widget.numberOfParticles,
-        maxBlastForce: widget.maxBlastForce,
-        minBlastForce: widget.minBlastForce,
-        gravity: widget.gravity,
-        blastDirection: widget.blastDirection,
-        blastDirectionality: widget.blastDirectionality,
-        colors: widget.colors,
-        minimumSize: widget.minimumSize,
-        maximumSize: widget.maximumSize,
-        particleDrag: widget.particleDrag,
-        createParticlePath: widget.createParticlePath);
+      emissionFrequency: widget.emissionFrequency,
+      numberOfParticles: widget.numberOfParticles,
+      maxBlastForce: widget.maxBlastForce,
+      minBlastForce: widget.minBlastForce,
+      gravity: widget.gravity,
+      blastDirection: widget.blastDirection,
+      blastDirectionality: widget.blastDirectionality,
+      colors: widget.colors,
+      minimumSize: widget.minimumSize,
+      maximumSize: widget.maximumSize,
+      particleDrag: widget.particleDrag,
+      createParticlePath: widget.createParticlePath,
+    );
 
     _particleSystem.addListener(_particleSystemListener);
 
@@ -200,6 +210,12 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     } else if (widget.confettiController.state ==
         ConfettiControllerState.stopped) {
       _stopEmission();
+    } else if (widget.confettiController.state ==
+        ConfettiControllerState.stoppedAndCleared) {
+      _stopEmission(clearAllParticles: true);
+    } else if (widget.confettiController.state ==
+        ConfettiControllerState.disposed) {
+      _stopEmission(clearAllParticles: true);
     }
   }
 
@@ -216,10 +232,18 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     lastTime = currentTime;
 
     if (deltaTime > kLowLimit) {
-      _particleSystem.update(kLowLimit);
+      _particleSystem.update(kLowLimit,
+          pauseEmission: widget.pauseEmissionOnLowFrameRate);
     } else {
       _particleSystem.update(deltaTime);
     }
+
+    widget.confettiController.particleStatsCallback?.call(
+      ParticleStats(
+        numberOfParticles: _particleSystem.numberOfParticles,
+        activeNumberOfParticles: _particleSystem.activeNumberOfParticles,
+      ),
+    );
   }
 
   void _animationStatusListener(AnimationStatus status) {
@@ -241,11 +265,11 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     _particleSystem.startParticleEmission();
   }
 
-  void _stopEmission() {
+  void _stopEmission({bool clearAllParticles = false}) {
     if (_particleSystem.particleSystemStatus == ParticleSystemStatus.stopped) {
       return;
     }
-    _particleSystem.stopParticleEmission();
+    _particleSystem.stopParticleEmission(clearAllParticles: clearAllParticles);
   }
 
   void _startAnimation() {
@@ -280,8 +304,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   Offset _getContainerPosition() {
     final containerRenderBox =
-        _particleSystemKey.currentContext!.findRenderObject() as RenderBox;
-    return containerRenderBox.localToGlobal(Offset.zero);
+        _particleSystemKey.currentContext?.findRenderObject() as RenderBox?;
+    return containerRenderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
   }
 
   Size _getScreenSize() {
@@ -299,18 +323,17 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   void _updatePositionAndSize() {
     if (_getScreenSize() != _screenSize) {
       _setScreenSize();
-      if (_emitterPosition != null) {
-        _setEmitterPosition();
-      }
+      _setEmitterPosition();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    _updatePositionAndSize();
+    _updatePositionAndSize(); // TODO: improve
     return RepaintBoundary(
       child: CustomPaint(
         key: _particleSystemKey,
+        willChange: true,
         foregroundPainter: ParticlePainter(
           _animController,
           strokeWidth: widget.strokeWidth,
@@ -385,11 +408,15 @@ class ParticlePainter extends CustomPainter {
 
   void _paintParticles(Canvas canvas) {
     for (final particle in particles) {
+      if (!particle.active) continue;
       final rotationMatrix4 = Matrix4.identity()
         ..translate(particle.location.dx, particle.location.dy)
         ..rotateX(particle.angleX)
-        ..rotateY(particle.angleY)
-        ..rotateZ(particle.angleZ);
+        ..rotateY(particle.angleY);
+
+      if (particle.rotateZ) {
+        rotationMatrix4.rotateZ(particle.angleZ);
+      }
 
       final finalPath = particle.path.transform(rotationMatrix4.storage);
       canvas.drawPath(finalPath, _particlePaint..color = particle.color);
@@ -405,23 +432,48 @@ class ParticlePainter extends CustomPainter {
   }
 }
 
+/// {@template particle_stats_callback}
+/// This callback provides [ParticleStats] as an argument.
+/// {@endtemplate}
+typedef ParticleStatsCallback = void Function(ParticleStats stats);
+
 class ConfettiController extends ChangeNotifier {
-  ConfettiController({this.duration = const Duration(seconds: 30)})
-      : assert(!duration.isNegative && duration.inMicroseconds > 0);
+  ConfettiController({
+    this.duration = const Duration(seconds: 30),
+    this.particleStatsCallback,
+  }) : assert(!duration.isNegative && duration.inMicroseconds > 0);
 
   Duration duration;
 
   ConfettiControllerState _state = ConfettiControllerState.stopped;
 
+  /// {@macro confetti_controller_state}
   ConfettiControllerState get state => _state;
+
+  /// {@macro particle_stats_callback}
+  final ParticleStatsCallback? particleStatsCallback;
 
   void play() {
     _state = ConfettiControllerState.playing;
     notifyListeners();
   }
 
-  void stop() {
-    _state = ConfettiControllerState.stopped;
+  void stop({bool clearAllParticles = false}) {
+    // if state is already disposed, it can not be stopped.
+    if (_state == ConfettiControllerState.disposed) return;
+
+    if (clearAllParticles) {
+      _state = ConfettiControllerState.stoppedAndCleared;
+    } else {
+      _state = ConfettiControllerState.stopped;
+    }
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _state = ConfettiControllerState.disposed;
+    notifyListeners();
+    super.dispose();
   }
 }
