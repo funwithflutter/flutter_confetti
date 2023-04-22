@@ -265,7 +265,7 @@ class Particle {
     final dragMagnitude = _particleDrag * speed * speed;
     final drag = _velocity.clone()
       ..multiply(vmath.Vector2.all(-1))
-      ..normalize()
+      ..normalizeHack()
       ..multiply(vmath.Vector2.all(dragMagnitude));
     applyForce(drag);
   }
@@ -317,4 +317,16 @@ class Particle {
   double get angleX => _aX;
   double get angleY => _aY;
   double get angleZ => _aZ;
+  
+  double normalizeHack() {
+    final l = length;
+    if (l == 0.0) {
+      print("Ugly hack to avoid crash");
+      return 0.0;
+    }
+    final d = 1.0 / l;
+    _v2storage[0] *= d;
+    _v2storage[1] *= d;
+    return l;
+  }
 }
