@@ -54,7 +54,7 @@ class ParticleSystem extends ChangeNotifier {
         _minimumSize = minimumSize,
         _maximumSize = maximumSize,
         _particleDrag = particleDrag,
-        _rand = Random(),
+        _rand = Random.secure(),
         _createParticlePath = createParticlePath;
 
   ParticleSystemStatus? _particleSystemStatus;
@@ -171,7 +171,7 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   double get _randomBlastDirection =>
-      vmath.radians(Random().nextInt(359).toDouble());
+      vmath.radians(Random.secure().nextInt(359).toDouble());
 
   vmath.Vector2 _generateParticleForce() {
     var blastDirection = _blastDirection;
