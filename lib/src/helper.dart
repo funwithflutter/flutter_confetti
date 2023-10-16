@@ -3,7 +3,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
-final _rand = Random();
+final _rand = Random.secure();
 
 class Helper {
   static double randomize(double min, double max) {
@@ -11,6 +11,6 @@ class Helper {
   }
 
   static Color randomColor() {
-    return Colors.primaries[Random().nextInt(Colors.primaries.length)];
+    return Colors.primaries[Random.secure().nextInt(Colors.primaries.length)];
   }
 }

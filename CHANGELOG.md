@@ -1,4 +1,9 @@
 ## [0.7.0]
+🔄  Changed
+- `Random()` usage is replaced with `Random.secure()` to provide a cryptographically secure
+  source of random numbers
+
+## [0.7.0]
 ⭐️ Added
 - Stroke width and color can now optionally be set. `strokeWidth` (default 0) and `strokeColor` (default black). Requires a stroke width bigger than 0
 - Updated to Flutter 3.0
