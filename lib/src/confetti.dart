@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:confetti/src/particle.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ class ConfettiWidget extends StatefulWidget {
     this.canvas,
     this.child,
     this.createParticlePath,
+    this.imagePath,
   })  : assert(
           emissionFrequency >= 0 &&
               emissionFrequency <= 1 &&
@@ -135,6 +137,9 @@ class ConfettiWidget extends StatefulWidget {
   /// Child widget to display
   final Widget? child;
 
+  /// image path to display
+  final String? imagePath;
+
   @override
   _ConfettiWidgetState createState() => _ConfettiWidgetState();
 }
@@ -171,11 +176,22 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
         minimumSize: widget.minimumSize,
         maximumSize: widget.maximumSize,
         particleDrag: widget.particleDrag,
-        createParticlePath: widget.createParticlePath);
-
-    _particleSystem.addListener(_particleSystemListener);
+        createParticlePath: widget.createParticlePath,
+    );
 
     _initAnimation();
+
+    // with image
+    if (widget.imagePath != null) {
+      _loadParticleImage(widget.imagePath!);
+    } else {
+      _particleSystem.addListener(_particleSystemListener);
+    }
+  }
+
+  Future<void> _loadParticleImage(String imagePath) async {
+    await _particleSystem.loadImage(imagePath);
+    _particleSystem.addListener(_particleSystemListener);
   }
 
   void _initAnimation() {
@@ -305,6 +321,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
           strokeColor: widget.strokeColor,
           particles: _particleSystem.particles,
           paintEmitterTarget: widget.displayTarget,
+          withImage: widget.imagePath != null,
         ),
         child: widget.child,
       ),
@@ -325,6 +342,7 @@ class ParticlePainter extends CustomPainter {
   ParticlePainter(
     Listenable? repaint, {
     required this.particles,
+    required this.withImage,
     bool paintEmitterTarget = true,
     Color emitterTargetColor = Colors.black,
     Color strokeColor = Colors.black,
@@ -350,13 +368,19 @@ class ParticlePainter extends CustomPainter {
   final Paint _particlePaint;
   final Paint _particleStrokePaint;
   final double strokeWidth;
+  final bool withImage;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (_paintEmitterTarget) {
       _paintEmitter(canvas);
     }
-    _paintParticles(canvas);
+
+    if (withImage) {
+      _paintParticlesWithImage(canvas);
+    } else {
+      _paintParticles(canvas);
+    }
   }
 
   // TODO: seperate this
@@ -384,6 +408,31 @@ class ParticlePainter extends CustomPainter {
       if (strokeWidth > 0) {
         canvas.drawPath(finalPath, _particleStrokePaint);
       }
+    }
+  }
+
+  void _paintParticlesWithImage(Canvas canvas) {
+    for (final particle in particles) {
+      final rotationMatrix4 = Matrix4.identity()
+        ..translate(particle.location.dx, particle.location.dy)
+        ..rotateX(particle.angleX)
+        ..rotateY(particle.angleY)
+        ..rotateZ(particle.angleZ);
+
+      final finalPath = particle.path.transform(rotationMatrix4.storage);
+      final particlePath = particle.path;
+
+      canvas.save();
+      canvas.translate(particle.location.dx, particle.location.dy);
+      canvas.clipPath(particlePath);
+
+      final image  = particle.image;
+      canvas.drawImage(image!, Offset(-particle.size.width / 2, -particle.size.width / 2), _particlePaint);
+
+      if (strokeWidth > 0) {
+        canvas.drawPath(particlePath, _particleStrokePaint);
+      }
+      canvas.restore();
     }
   }
 

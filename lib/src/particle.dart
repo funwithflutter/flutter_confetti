@@ -1,12 +1,15 @@
 import 'dart:math';
 import 'dart:ui';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart' as vmath;
 
 import 'package:confetti/src/helper.dart';
-
+import 'package:flutter/services.dart' show rootBundle;
 import 'enums/blast_directionality.dart';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 enum ParticleSystemStatus {
   started,
@@ -82,6 +85,7 @@ class ParticleSystem extends ChangeNotifier {
   late double _bottomBorder;
   late double _rightBorder;
   late double _leftBorder;
+  ui.Image? _image = null;
 
   final Random _rand;
 
@@ -166,8 +170,29 @@ class ParticleSystem extends ChangeNotifier {
   List<Particle> _generateParticles({int number = 1}) {
     return List<Particle>.generate(
         number,
-        (i) => Particle(_generateParticleForce(), _randomColor(), _randomSize(),
-            _gravity, _particleDrag, _createParticlePath));
+        (i) => Particle(
+            _generateParticleForce(), _randomColor(), _randomSize(),
+            _gravity, _particleDrag, _createParticlePath,
+            _image,
+        ),
+    );
+  }
+
+  // 画像をロードする関数
+  // 非同期的に画像を読み込むメソッド
+  Future<void> loadImage(String path) async {
+    try {
+      final ByteData data = await rootBundle.load(path);
+      final Uint8List bytes = data.buffer.asUint8List();
+      final Completer<ui.Image> completer = Completer();
+      ui.decodeImageFromList(bytes, (ui.Image img) {
+        completer.complete(img);
+      });
+      _image = await completer.future;
+    } catch (e) {
+      print('Error loading image: $e');
+      _image = null;
+    }
   }
 
   double get _randomBlastDirection =>
@@ -204,8 +229,11 @@ class ParticleSystem extends ChangeNotifier {
 }
 
 class Particle {
-  Particle(vmath.Vector2 startUpForce, Color color, Size size, double gravity,
-      double particleDrag, Path Function(Size size)? createParticlePath)
+  Particle(
+      vmath.Vector2 startUpForce, Color color, Size size, double gravity,
+      double particleDrag, Path Function(Size size)? createParticlePath,
+      ui.Image? image,
+      )
       : _startUpForce = startUpForce,
         _color = color,
         _mass = Helper.randomize(1, 11),
@@ -214,14 +242,18 @@ class Particle {
         _acceleration = vmath.Vector2.zero(),
         _velocity =
             vmath.Vector2(Helper.randomize(-3, 3), Helper.randomize(-3, 3)),
-        // _size = size,
+        _size = size,
         _pathShape = createParticlePath != null
             ? createParticlePath(size)
             : createPath(size),
         _aVelocityX = Helper.randomize(-0.1, 0.1),
         _aVelocityY = Helper.randomize(-0.1, 0.1),
         _aVelocityZ = Helper.randomize(-0.1, 0.1),
-        _gravity = lerpDouble(0.1, 5, gravity);
+        _gravity = lerpDouble(0.1, 5, gravity),
+        _image = image;
+
+  ui.Image? _image;
+  final Size _size;
 
   final vmath.Vector2 _startUpForce;
 
@@ -310,6 +342,9 @@ class Particle {
     }
     return Offset(_location.x, _location.y);
   }
+
+  ui.Image? get image  => _image;
+  Size get size => _size;
 
   Color get color => _color;
   Path get path => _pathShape;
