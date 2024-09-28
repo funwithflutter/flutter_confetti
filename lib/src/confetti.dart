@@ -314,7 +314,14 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   Size _getScreenSize() {
     if (mounted) {
+      try {
       return widget.canvas ?? MediaQuery.of(context).size;
+      } catch (e) {
+        // Ugh flutter debug on web throws an error here. Need to clean this
+        // whole thing up.
+        print('[flutter_confetti] Error getting screen size: $e');
+        return widget.canvas ?? Size.zero;
+      }
     } else {
       return widget.canvas ?? Size.zero;
     }
