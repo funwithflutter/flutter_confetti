@@ -315,7 +315,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   Size _getScreenSize() {
     if (mounted) {
       try {
-      return widget.canvas ?? MediaQuery.of(context).size;
+        return widget.canvas ?? MediaQuery.of(context).size;
       } catch (e) {
         // Ugh flutter debug on web throws an error here. Need to clean this
         // whole thing up.
@@ -433,14 +433,44 @@ class ParticlePainter extends CustomPainter {
   void _paintParticles(Canvas canvas) {
     for (final particle in particles) {
       if (!particle.active) continue;
-      final rotationMatrix4 = Matrix4.identity()
-        ..translate(particle.location.dx, particle.location.dy)
-        ..rotateX(particle.angleX)
-        ..rotateY(particle.angleY);
 
-      if (particle.rotateZ) {
-        rotationMatrix4.rotateZ(particle.angleZ);
-      }
+      // OG way to do it.
+      // final rotationMatrix4 = Matrix4.identity()
+      //   ..setEntry(3, 2, 0.001) // perspective
+      //   ..translate(particle.location.dx, particle.location.dy)
+      //   ..rotateX(particle.angleX)
+      //   ..rotateY(particle.angleY)
+      //   ..rotateZ(particle.rotateZ ? particle.angleZ : 0.0);
+
+      // Manual way to do it. Should be more performant, and less memory usage.
+      // Should be the same as above... Looking good to me.
+      final dx = particle.location.dx;
+      final dy = particle.location.dy;
+      final cosX = cos(particle.angleX);
+      final sinX = sin(particle.angleX);
+      final cosY = cos(particle.angleY);
+      final sinY = sin(particle.angleY);
+      final cosZ = particle.rotateZ ? cos(particle.angleZ) : 1.0;
+      final sinZ = particle.rotateZ ? sin(particle.angleZ) : 0.0;
+
+      final rotationMatrix4 = Matrix4(
+        cosY * cosZ,
+        cosX * sinZ + sinX * sinY * cosZ,
+        sinX * sinZ - cosX * sinY * cosZ,
+        0.0,
+        -cosY * sinZ,
+        cosX * cosZ - sinX * sinY * sinZ,
+        sinX * cosZ + cosX * sinY * sinZ,
+        0.0,
+        sinY,
+        -sinX * cosY,
+        cosX * cosY,
+        0.001, // perspective
+        dx,
+        dy,
+        0.0,
+        1.0,
+      );
 
       final finalPath = particle.path.transform(rotationMatrix4.storage);
       canvas.drawPath(finalPath, _particlePaint..color = particle.color);
