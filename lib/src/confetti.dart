@@ -197,10 +197,12 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
       ..addListener(_animationListener)
       ..addStatusListener(_animationStatusListener);
 
-    if (widget.confettiController.state == ConfettiControllerState.playing) {
-      _startAnimation();
-      _startEmission();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.confettiController.state == ConfettiControllerState.playing) {
+        _startAnimation();
+        _startEmission();
+      }
+    });
   }
 
   void _handleChange() {
@@ -274,13 +276,11 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   void _startAnimation() {
     // Make sure widgets are built before setting screen size and position
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _setScreenSize();
-        _setEmitterPosition();
-        _animController.forward(from: 0);
-      }
-    });
+    if (mounted) {
+      _setScreenSize();
+      _setEmitterPosition();
+      _animController.forward(from: 0);
+    }
   }
 
   void _stopAnimation() {
@@ -303,13 +303,21 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   Offset _getContainerPosition() {
-    final containerRenderBox =
-        _particleSystemKey.currentContext?.findRenderObject() as RenderBox?;
-    return containerRenderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+    if (mounted) {
+      final containerRenderBox =
+          _particleSystemKey.currentContext?.findRenderObject() as RenderBox?;
+      return containerRenderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+    } else {
+      return Offset.zero;
+    }
   }
 
   Size _getScreenSize() {
-    return widget.canvas ?? MediaQuery.of(context).size;
+    if (mounted) {
+      return widget.canvas ?? MediaQuery.of(context).size;
+    } else {
+      return widget.canvas ?? Size.zero;
+    }
   }
 
   /// On layout change update the position of the emitter
@@ -321,6 +329,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   /// The emitter position is first set in the `addPostFrameCallback`
   /// in [initState].
   void _updatePositionAndSize() {
+    // TODO: improve this
     if (_getScreenSize() != _screenSize) {
       _setScreenSize();
       _setEmitterPosition();
@@ -329,20 +338,28 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
   @override
   Widget build(BuildContext context) {
-    _updatePositionAndSize(); // TODO: improve
-    return RepaintBoundary(
-      child: CustomPaint(
-        key: _particleSystemKey,
-        willChange: true,
-        foregroundPainter: ParticlePainter(
-          _animController,
-          strokeWidth: widget.strokeWidth,
-          strokeColor: widget.strokeColor,
-          particles: _particleSystem.particles,
-          paintEmitterTarget: widget.displayTarget,
-        ),
-        child: widget.child,
-      ),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        // Update position and size only when layout changes
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _updatePositionAndSize();
+        });
+
+        return RepaintBoundary(
+          child: CustomPaint(
+            key: _particleSystemKey,
+            willChange: true,
+            foregroundPainter: ParticlePainter(
+              _animController,
+              strokeWidth: widget.strokeWidth,
+              strokeColor: widget.strokeColor,
+              particles: _particleSystem.particles,
+              paintEmitterTarget: widget.displayTarget,
+            ),
+            child: widget.child,
+          ),
+        );
+      },
     );
   }
 
