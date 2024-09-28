@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 
 final _rand = Random();
 
-class Helper {
-  static double randomize(double min, double max) {
-    return lerpDouble(min, max, _rand.nextDouble())!;
-  }
+abstract class Helper {
+  static double randomize(double min, double max) =>
+      lerpDouble(min, max, _rand.nextDouble())!;
 
-  static Color randomColor() {
-    return Colors.primaries[Random().nextInt(Colors.primaries.length)];
-  }
+  static Color randomColor() =>
+      Colors.primaries[_rand.nextInt(Colors.primaries.length)];
+
+  static bool randomBool() => _rand.nextBool();
 }

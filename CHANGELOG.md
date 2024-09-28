@@ -1,3 +1,21 @@
+## Upcomming
+⛔️ Breaking!
+- Added the concept of delta time, to allow for better simulation when the refresh rate is 120 (or more than 60). There should be no noticable change on a 60fps screen, however, there may be variance if Flutter drops frames. No changes needed from a widget level.
+- `ParticleSystem.update` and `Pariticle.update` now contain a `deltaTime` argument. No changes needed from a widget level.
+- Some visual difference, as now not all particles will rotate on the z-axis (50% chance). This change was maded to enhance visual fidelity.
+
+⭐️ Added
+- `clearAllParticles` added to stop method on controller: `_confettiController.stop(clearAllParticles: true);` default is false. If true particles will immediately be cleared/removed on stop. Calling `dispose` will also clear all particles immediately.
+- `particleStatsCallback` added to `Confetti` widget to retrieve the `ParticleStats`. This provides info on the particle system, such as number of active and number of total particles in memory.
+- `pauseEmissionOnLowFrameRate` to `Confetti` widget. Default is true. This will pause additional confetti emission if the frame rate is below 60fps, and will continue when resources are available. This can be disabled by setting to `false`, to force particle creation regardless of frame rate.
+
+⚡️ Improved
+- Various performance improvements!
+  - Confetti is now conditionally reused instead of recreated, big improvement
+  - 120hz refresh rate supported
+  - `pauseEmissionOnLowFrameRate` boolean added to `Confetti` widget to ensure smooth 60 FPS. This may however result in no confetti appearing if other complex operations are taking up resources. Set to `false` to disable.
+  - Temporary fix for issue [[#66](https://github.com/funwithflutter/flutter_confetti/issues/66)] with severe perf issues on Chrome macOS.
+
 ## [0.7.0]
 ⭐️ Added
 - Stroke width and color can now optionally be set. `strokeWidth` (default 0) and `strokeColor` (default black). Requires a stroke width bigger than 0
