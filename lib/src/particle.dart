@@ -2,11 +2,10 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:confetti/src/constants.dart';
+import 'package:confetti/src/helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart' as vmath;
-
-import 'package:confetti/src/helper.dart';
 
 import 'enums/blast_directionality.dart';
 
@@ -250,9 +249,18 @@ class ParticleSystem extends ChangeNotifier {
     if (_blastDirectionality == BlastDirectionality.explosive) {
       blastDirection = _randomBlastDirection;
     }
+
+    // Expand firing area instead of single-point shooting.
+    const spread = pi / 3;
+
+    final randomOffset = (Random().nextDouble() - 0.5) * spread;
+
+    blastDirection = _blastDirection + randomOffset;
+
     final blastRadius = Helper.randomize(_minBlastForce, _maxBlastForce);
-    final y = blastRadius * sin(blastDirection);
+
     final x = blastRadius * cos(blastDirection);
+    final y = blastRadius * sin(blastDirection);
     return vmath.Vector2(x, y);
   }
 
@@ -292,7 +300,7 @@ class Particle {
         _location = vmath.Vector2.zero(),
         _acceleration = vmath.Vector2.zero(),
         _velocity =
-            vmath.Vector2(Helper.randomize(-3, 3), Helper.randomize(-3, 3)),
+            vmath.Vector2(Helper.randomize(-1.5, 1.5), Helper.randomize(-2, 2)),
         _pathShape = createParticlePath != null
             ? createParticlePath(size)
             : createPath(size),
@@ -300,10 +308,12 @@ class Particle {
         _aVelocityY = Helper.randomize(-0.1, 0.1),
         _aVelocityZ = Helper.randomize(-0.1, 0.1),
         _rotateZ = Helper.randomBool(),
-        gravityVector = vmath.Vector2(
-          0,
-          lerpDouble(0.1, 5, gravity)!,
-        ),
+        _windSeed = Random().nextDouble() * 1000,
+        _baseWindDirection = Random().nextBool() ? 1.0 : -1.0,
+        _windIntensity = _generateWindIntensityDistribution(),
+        _maxLifetime = _calculateLifetimeBasedOnGravity(gravity),
+        _fadeStartRatio = Helper.randomize(0.7, 0.85),
+        gravityVector = vmath.Vector2(0, lerpDouble(0.4, 5, gravity)!),
         _active = true;
 
   final double gravity;
@@ -330,12 +340,49 @@ class Particle {
   final Path _pathShape;
 
   bool _active;
+
   bool get active => _active;
 
   final bool _rotateZ;
 
   double _timeAlive = 0;
   vmath.Vector2 windforceUp = vmath.Vector2(0, -1);
+
+  final double _maxLifetime;
+  final double _fadeStartRatio;
+
+  double _windSeed; // Changed from final to allow pattern changes
+  double _baseWindDirection; // Changed from final to allow direction changes
+  final double _windIntensity;
+
+  // Direction change properties (only for windIntensity > 0.7)
+  double _lastDirectionChangeTime = 0;
+  double _directionChangeInterval = 60; // Initial interval (1 second at 60fps)
+
+  static double _generateWindIntensityDistribution() {
+    final random = Random().nextDouble();
+
+    if (random < 0.4) {
+      return Helper.randomize(0.0, 0.3);
+    } else if (random < 0.7) {
+      return Helper.randomize(0.3, 0.7);
+    } else {
+      return Helper.randomize(0.7, 1.0);
+    }
+  }
+
+  static double _calculateLifetimeBasedOnGravity(double gravity) {
+    // Approximation:
+    // gravity = 0.0 → lifetime = 360 frames
+    // gravity = 1.0 → lifetime = 30 frames
+    final baseLifetime = lerpDouble(360, 30, gravity)!;
+
+    // Add a bit of randomness to create diversity
+    final minLifetime = baseLifetime * 0.9;
+    final maxLifetime = baseLifetime * 1.1;
+
+    return Helper.randomize(minLifetime, maxLifetime);
+  }
 
   static Path createPath(Size size) {
     final pathShape = Path()
@@ -365,7 +412,7 @@ class Particle {
 
     _location.setValues(0, 0);
     _acceleration.setValues(0, 0);
-    _velocity.setValues(Helper.randomize(-3, 3), Helper.randomize(-3, 3));
+    _velocity.setValues(Helper.randomize(-1.5, 1.5), Helper.randomize(-2, 2));
 
     _aX = 0;
     _aY = 0;
@@ -374,10 +421,11 @@ class Particle {
     _aVelocityY = Helper.randomize(-0.1, 0.1);
     _aVelocityZ = Helper.randomize(-0.1, 0.1);
 
-    gravityVector.setValues(
-      0,
-      lerpDouble(0.1, 5, gravity)!,
-    );
+    gravityVector.setValues(0, lerpDouble(0.3, 5, gravity)!);
+
+    // Reset direction change properties
+    _lastDirectionChangeTime = 0;
+    _directionChangeInterval = Helper.randomize(60, 120);
 
     _active = true;
   }
@@ -415,9 +463,18 @@ class Particle {
 
     applyForce(gravityVector, deltaTimeSpeed);
 
+    // Check direction change for complex movement particles (windIntensity > 0.7)
+    if (_windIntensity > 0.7 && _timeAlive > 20) {
+      _checkDirectionChange();
+    }
+
+    final windforceHorizontal = _calculateSmoothWindForce();
+    applyForce(windforceHorizontal, deltaTimeSpeed);
     _velocity.add(_acceleration * deltaTimeSpeed);
     _location.add(_velocity * deltaTimeSpeed);
     _acceleration.setZero();
+
+    _timeAlive += 1;
 
     _aVelocityX += _aAcceleration;
     _aX += _aVelocityX * deltaTimeSpeed;
@@ -429,6 +486,72 @@ class Particle {
       _aZ += _aVelocityZ * deltaTimeSpeed;
       _aVelocityZ += _aAcceleration;
     }
+
+    if (_timeAlive >= _maxLifetime) {
+      deactivate();
+    }
+  }
+
+  /// Check if particle should change direction (only for windIntensity > 0.7)
+  void _checkDirectionChange() {
+    // Check if enough time has passed since last direction change
+    if (_timeAlive - _lastDirectionChangeTime >= _directionChangeInterval) {
+      // 30% chance to actually change direction each time we check
+      if (Random().nextDouble() < 0.3) {
+        _performDirectionChange();
+        _lastDirectionChangeTime = _timeAlive;
+
+        // Set new random interval for next direction change (1-2 seconds)
+        _directionChangeInterval = Helper.randomize(60, 120);
+      }
+    }
+  }
+
+  /// Perform the actual direction change with different types
+  void _performDirectionChange() {
+    final changeType = Random().nextInt(2);
+
+    switch (changeType) {
+      case 0: // Reverse wind direction
+        _baseWindDirection *= -1;
+        break;
+
+      case 1: // Change oscillation pattern
+        _windSeed = Random().nextDouble() * 1000; // New pattern
+        break;
+    }
+  }
+
+  vmath.Vector2 _calculateSmoothWindForce() {
+    final timeScale = _timeAlive * 0.03;
+
+    // Create 3 groups of particles with different behaviors to make the wind effect more natural:
+    // 1. Group falls straight down (windIntensity < 0.3)
+    // 2. Group falls slightly to the left/right (windIntensity 0.3-0.7)
+    // 3. Group with complex movement  windIntensity > 0.7)
+
+    double windForceX = 0;
+
+    if (_windIntensity < 0.3) {
+      final gentleWave = sin(timeScale + _windSeed) * 0.05;
+      windForceX = gentleWave;
+    } else if (_windIntensity < 0.7) {
+      final slowWave = sin(timeScale + _windSeed) * 0.08;
+      final mediumWave = sin(timeScale * 2.0 + _windSeed * 1.2) * 0.06;
+      final windVariation = slowWave + mediumWave;
+
+      windForceX = _baseWindDirection * 0.25 * (1 + windVariation);
+    } else {
+      final slowWave = sin(timeScale + _windSeed) * 0.12;
+      final mediumWave = sin(timeScale * 2.5 + _windSeed * 1.3) * 0.10;
+      final fastWave = sin(timeScale * 4.0 + _windSeed * 2.1) * 0.05;
+      final windVariation = slowWave + mediumWave + fastWave;
+
+      windForceX =
+          _baseWindDirection * _windIntensity * 0.35 * (1 + windVariation);
+    }
+    final windForceY = sin(timeScale * 2.0 + _windSeed) * 0.03;
+    return vmath.Vector2(windForceX, windForceY);
   }
 
   Offset get location {
@@ -438,11 +561,37 @@ class Particle {
     return Offset(_location.x, _location.y);
   }
 
-  Color get color => _color;
+  Color get color {
+    final opacity = _calculateOpacity();
+    return _color.withOpacity(opacity);
+  }
+
+  Color get originalColor => _color;
+
+  double _calculateOpacity() {
+    final fadeStartTime = _maxLifetime * _fadeStartRatio;
+    if (_timeAlive <= fadeStartTime) {
+      return 1.0;
+    }
+
+    if (_timeAlive >= _maxLifetime) {
+      return 0.0;
+    }
+
+    // Calculate opacity fading from fadeStartTime to maxLifetime
+    final fadeProgress =
+        (_timeAlive - fadeStartTime) / (_maxLifetime - fadeStartTime);
+    final opacity = 1.0 - fadeProgress;
+
+    return opacity.clamp(0.0, 1.0);
+  }
+
   Path get path => _pathShape;
 
   double get angleX => _aX;
+
   double get angleY => _aY;
+
   double get angleZ => _aZ;
 
   bool get rotateZ => _rotateZ;
