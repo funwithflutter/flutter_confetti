@@ -32,6 +32,7 @@ class ParticleSystem extends ChangeNotifier {
     required double minBlastForce,
     required double blastDirection,
     required BlastDirectionality blastDirectionality,
+    required double blastSpread,
     required List<Color>? colors,
     required Size minimumSize,
     required Size maximumSize,
@@ -53,8 +54,10 @@ class ParticleSystem extends ChangeNotifier {
             particleDrag <= 1 &&
             minimumSize.height <= maximumSize.height),
         assert(gravity >= 0 && gravity <= 1),
+        assert(blastSpread >= 0 && blastSpread <= 2 * pi),
         _blastDirection = blastDirection,
         _blastDirectionality = blastDirectionality,
+        _blastSpread = blastSpread,
         _gravity = gravity,
         _maxBlastForce = maxBlastForce,
         _minBlastForce = minBlastForce,
@@ -79,6 +82,7 @@ class ParticleSystem extends ChangeNotifier {
   final double _minBlastForce;
   final double _blastDirection;
   final BlastDirectionality _blastDirectionality;
+  final double _blastSpread;
   final double _gravity;
   final List<Color>? _colors;
   final Size _minimumSize;
@@ -249,6 +253,9 @@ class ParticleSystem extends ChangeNotifier {
     var blastDirection = _blastDirection;
     if (_blastDirectionality == BlastDirectionality.explosive) {
       blastDirection = _randomBlastDirection;
+    } else if (_blastSpread > 0) {
+      blastDirection +=
+          (_rand.nextDouble() * _blastSpread) - (_blastSpread / 2);
     }
     final blastRadius = Helper.randomize(_minBlastForce, _maxBlastForce);
     final y = blastRadius * sin(blastDirection);

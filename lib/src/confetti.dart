@@ -18,6 +18,7 @@ class ConfettiWidget extends StatefulWidget {
     this.minBlastForce = 5,
     this.blastDirectionality = BlastDirectionality.directional,
     this.blastDirection = pi,
+    this.blastSpread = 0.0,
     this.gravity = 0.2,
     this.shouldLoop = false,
     this.displayTarget = false,
@@ -39,6 +40,8 @@ class ConfettiWidget extends StatefulWidget {
               minBlastForce > 0 &&
               maxBlastForce > minBlastForce,
         ),
+        assert(blastSpread >= 0 && blastSpread <= 2 * pi,
+            '`blastSpread` needs to be between 0 and 2*pi'),
         assert(gravity >= 0 && gravity <= 1,
             '`gravity` needs to be between 0 and 1'),
         assert(strokeWidth >= 0, '`strokeWidth needs to be bigger than 0'),
@@ -69,6 +72,16 @@ class ConfettiWidget extends StatefulWidget {
   /// The default is set to `PI` (180 degrees).
   /// A value of `PI` will emit to the left of the canvas/screen.
   final double blastDirection;
+
+  /// The [blastSpread] is the angular spread (in radians) of the directional
+  /// blast, centered on [blastDirection].
+  ///
+  /// A value of `0.0` (default) emits all particles in exactly [blastDirection].
+  /// A value of `pi / 2` gives a ±45° spread cone.
+  /// A value of `2 * pi` gives a full 360° spread.
+  ///
+  /// Only applies when [blastDirectionality] is [BlastDirectionality.directional].
+  final double blastSpread;
 
   /// The [createParticlePath] is an optional function that returns a custom
   /// `Path` to generate particles.
@@ -177,6 +190,7 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
       gravity: widget.gravity,
       blastDirection: widget.blastDirection,
       blastDirectionality: widget.blastDirectionality,
+      blastSpread: widget.blastSpread,
       colors: widget.colors,
       minimumSize: widget.minimumSize,
       maximumSize: widget.maximumSize,
