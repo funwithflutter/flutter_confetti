@@ -86,7 +86,6 @@ class ParticleSystem extends ChangeNotifier {
   final double _particleDrag;
   final Path Function(Size size)? _createParticlePath;
 
-  Offset _particleSystemPosition = Offset.zero;
   Size _screenSize = Size.zero;
 
   late double _bottomBorder;
@@ -94,10 +93,6 @@ class ParticleSystem extends ChangeNotifier {
   late double _leftBorder;
 
   final Random _rand;
-
-  set particleSystemPosition(Offset position) {
-    _particleSystemPosition = position;
-  }
 
   set screenSize(Size size) {
     _screenSize = size;
@@ -208,10 +203,12 @@ class ParticleSystem extends ChangeNotifier {
   }
 
   bool _isOutsideOfBorder(Offset particleLocation) {
-    final globalParticlePosition = particleLocation + _particleSystemPosition;
-    return (globalParticlePosition.dy >= _bottomBorder) ||
-        (globalParticlePosition.dx >= _rightBorder) ||
-        (globalParticlePosition.dx <= _leftBorder);
+    // Cull in local/canvas space only. Mixing in global [localToGlobal] and
+    // [MediaQuery] sizes breaks when the subtree is offset or scaled (e.g.
+    // [DevicePreview]).
+    return (particleLocation.dy >= _bottomBorder) ||
+        (particleLocation.dx >= _rightBorder) ||
+        (particleLocation.dx <= _leftBorder);
   }
 
   void _addParticles(List<Particle> particles, {int number = 1}) {

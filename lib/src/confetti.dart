@@ -150,14 +150,9 @@ class ConfettiWidget extends StatefulWidget {
 
 class _ConfettiWidgetState extends State<ConfettiWidget>
     with SingleTickerProviderStateMixin {
-  final GlobalKey _particleSystemKey = GlobalKey();
-
   late AnimationController _animController;
   late Animation<double> _animation;
   late ParticleSystem _particleSystem;
-
-  /// Keeps track of emition position on screen layout changes
-  late Offset _emitterPosition;
 
   /// Keeps track of the screen size on layout changes.
   ///
@@ -275,10 +270,8 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   void _startAnimation() {
-    // Make sure widgets are built before setting screen size and position
     if (mounted) {
       _setScreenSize();
-      _setEmitterPosition();
       _animController.forward(from: 0);
     }
   }
@@ -297,21 +290,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     _particleSystem.screenSize = _screenSize;
   }
 
-  void _setEmitterPosition() {
-    _emitterPosition = _getContainerPosition();
-    _particleSystem.particleSystemPosition = _emitterPosition;
-  }
-
-  Offset _getContainerPosition() {
-    if (mounted) {
-      final containerRenderBox =
-          _particleSystemKey.currentContext?.findRenderObject() as RenderBox?;
-      return containerRenderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
-    } else {
-      return Offset.zero;
-    }
-  }
-
   Size _getScreenSize() {
     if (mounted) {
       try {
@@ -327,19 +305,9 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
     }
   }
 
-  /// On layout change update the position of the emitter
-  /// and the screen size.
-  ///
-  /// Only update the emitter if it has already been set, to avoid RenderObject
-  /// issues.
-  ///
-  /// The emitter position is first set in the `addPostFrameCallback`
-  /// in [initState].
   void _updatePositionAndSize() {
-    // TODO: improve this
     if (_getScreenSize() != _screenSize) {
       _setScreenSize();
-      _setEmitterPosition();
     }
   }
 
@@ -354,7 +322,6 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
 
         return RepaintBoundary(
           child: CustomPaint(
-            key: _particleSystemKey,
             willChange: true,
             foregroundPainter: ParticlePainter(
               _animController,
