@@ -80,7 +80,7 @@ class ParticleSystem extends ChangeNotifier {
   final double _blastDirection;
   final BlastDirectionality _blastDirectionality;
   final double _gravity;
-  final List<Color>? _colors;
+  List<Color>? _colors;
   final Size _minimumSize;
   final Size _maximumSize;
   final double _particleDrag;
@@ -104,6 +104,8 @@ class ParticleSystem extends ChangeNotifier {
     // needs to be called here to only set the borders once
     _setScreenBorderPositions();
   }
+
+  set colors(List<Color>? colors) => _colors = colors;
 
   void stopParticleEmission({bool clearAllParticles = false}) {
     _particleSystemStatus = ParticleSystemStatus.stopped;
