@@ -344,6 +344,14 @@ class _ConfettiWidgetState extends State<ConfettiWidget>
   }
 
   @override
+  void didUpdateWidget(ConfettiWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.colors != oldWidget.colors) {
+      _particleSystem.colors = widget.colors;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
